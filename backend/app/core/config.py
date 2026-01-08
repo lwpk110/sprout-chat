@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     # AI 配置
     ai_provider: str = "anthropic"  # anthropic 或 openai
     ai_model: str = "claude-3-5-sonnet-20241022"
+    ai_vision_model: str = "glm-4.6v"  # 视觉模型（图像识别）
     ai_max_tokens: int = 1000
     ai_temperature: float = 0.7
     anthropic_api_key: str = ""
