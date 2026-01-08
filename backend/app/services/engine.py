@@ -164,11 +164,23 @@ class ConversationEngine:
         self.add_message(session_id, "user", user_input)
 
         # 构建系统提示
-        system_prompt = get_sprout_prompt(
-            subject=session["subject"],
-            topic=session["topic"],
-            student_age=session["student_age"]
-        )
+        if use_guided:
+            # 使用教学策略选择器生成引导式 Prompt
+            system_prompt = self.strategy_selector.generate_guided_prompt(
+                problem=user_input,
+                student_age=session["student_age"],
+                problem_context={
+                    "subject": session["subject"],
+                    "topic": session["topic"]
+                }
+            )
+        else:
+            # 使用标准 Prompt
+            system_prompt = get_sprout_prompt(
+                subject=session["subject"],
+                topic=session["topic"],
+                student_age=session["student_age"]
+            )
 
         # 构建消息列表（给 Claude 的）
         messages_for_api = []
