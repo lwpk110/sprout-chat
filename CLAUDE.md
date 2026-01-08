@@ -56,6 +56,30 @@ sprout-chat/
 
 ## 开发约定
 
+### 0. 强制 TDD 流程 ⚠️ **必须遵守**
+
+**所有 Feature 开发必须遵循【红灯 -> 绿灯】循环**
+
+```bash
+# TDD 循环流程
+1. Red (红灯): 先写 tests/ 下的失败测试
+2. Commit: 提交测试代码 (git commit -m "[LWP-X] test: 添加 XXX 测试")
+3. Green (绿灯): 编写功能代码让测试通过
+4. Commit: 提交功能代码 (git commit -m "[LWP-X] feat: 实现 XXX 功能")
+5. Refactor (可选): 重构代码，保持测试通过
+6. Commit: 提交重构代码 (git commit -m "[LWP-X] refactor: 优化 XXX 代码")
+```
+
+**禁止行为**:
+- ❌ 先写功能代码，再补测试
+- ❌ 一次性提交测试+功能代码
+- ❌ 跳过测试直接编写功能
+
+**验证标准**:
+- 第一个 commit 运行测试必须失败 (Red)
+- 第二个 commit 运行测试必须通过 (Green)
+- 所有提交必须可以独立运行 pytest
+
 ### 1. Taskmaster 强制规范 ⚠️ **必须遵守**
 
 #### 1.1 任务先行原则
