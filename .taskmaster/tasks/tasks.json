@@ -1,0 +1,59 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "[P0] 配置后端基础环境 (FastAPI)",
+        "description": "创建 Python 虚拟环境，安装 FastAPI、uvicorn 等必要依赖，设置基础项目结构",
+        "status": "pending",
+        "priority": "critical",
+        "tags": ["backend", "setup"],
+        "dependencies": [],
+        "created_at": "2026-01-08T03:38:00.000Z",
+        "updated_at": "2026-01-08T03:38:00.000Z",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "[P0] 实现小芽核心对话引擎 (engine.py)",
+        "description": "实现小芽人格的对话管理引擎，包括 Prompt 模板、对话状态管理、引导式教学逻辑",
+        "status": "pending",
+        "priority": "critical",
+        "tags": ["backend", "ai", "core"],
+        "dependencies": [1],
+        "created_at": "2026-01-08T03:38:00.000Z",
+        "updated_at": "2026-01-08T03:38:00.000Z",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "[P1] 编写影子测试 (Shadow Test) 验证教学质量",
+        "description": "创建自动化测试框架，模拟教学场景验证小芽的教学效果和人格一致性",
+        "status": "pending",
+        "priority": "high",
+        "tags": ["testing", "quality"],
+        "dependencies": [2],
+        "created_at": "2026-01-08T03:38:00.000Z",
+        "updated_at": "2026-01-08T03:38:00.000Z",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "[P2] 搭建前端极简界面",
+        "description": "创建基础的 React + Tailwind 前端界面，包括语音输入、对话展示和小芽形象展示",
+        "status": "pending",
+        "priority": "medium",
+        "tags": ["frontend", "ui"],
+        "dependencies": [1],
+        "created_at": "2026-01-08T03:38:00.000Z",
+        "updated_at": "2026-01-08T03:38:00.000Z",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2026-01-08T03:37:40.372Z",
+      "updated": "2026-01-08T11:38:00.000Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
