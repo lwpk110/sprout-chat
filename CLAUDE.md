@@ -141,6 +141,115 @@ Co-Authored-By: ... (如果有)
 - 自动化测试必须通过
 - 代码覆盖率不低于 80%
 
+### 5. Git 版本控制规范 ⚠️ **必须遵守**
+
+#### 5.1 原子提交原则 (Atomic Commits)
+**每次提交仅包含一个逻辑变更，禁止批量提交**
+
+```bash
+# 正确的做法: 每个功能点独立提交
+git add backend/app/api/conversations.py
+git commit -m "[LWP-1] 实现会话创建 API"
+
+git add backend/app/services/engine.py
+git commit -m "[LWP-1] 实现对话引擎核心逻辑"
+
+git add tests/test_engine.py
+git commit -m "[LWP-1] 添加单元测试"
+
+# 错误的做法: 一次性提交所有修改
+git add .
+git commit -m "LWP-1 完成"  # ❌ 违反原子提交原则
+```
+
+#### 5.2 提交信息格式 (Commit Message Format)
+**所有提交必须遵循以下格式**
+
+```bash
+# 格式
+<TYPE>(Task-ID): <简短描述>
+
+# 详细说明（可选）
+# - 完成项 1
+# - 完成项 2
+
+# Refs: Task-ID
+
+# Co-Authored-By: ... (如果有)
+```
+
+**TYPE 类型**:
+- `feat`: 新功能
+- `fix`: Bug 修复
+- `docs`: 文档更新
+- `style`: 代码格式调整
+- `refactor`: 代码重构
+- `test`: 测试相关
+- `chore`: 构建/工具相关
+
+**示例**:
+```bash
+# 新功能
+git commit -m "[LWP-2] 实现 OCR 图像识别服务
+
+- 集成 PaddleOCR
+- 创建 /api/v1/ocr/upload 端点
+- 添加图像预处理流程
+
+Refs: LWP-2"
+
+# Bug 修复
+git commit -m "[LWP-1] 修复会话过期时间计算错误"
+
+# 文档更新
+git commit -m "[LWP-1] 更新 API 文档"
+```
+
+#### 5.3 提交前检查 (Pre-commit Checks)
+**每次提交前必须执行的检查**
+
+```bash
+# 1. 语法检查
+python -m py_compile backend/app/**/*.py
+
+# 2. 代码格式化
+black backend/app --check
+isort backend/app --check
+
+# 3. 测试验证
+pytest backend/tests/ -v
+
+# 4. 查看 Git 状态
+git status
+```
+
+#### 5.4 强制执行规范 (Forced Execution)
+**除非用户明确要求，否则在完成 Taskmaster 的每个子步骤后，请主动执行提交，无需询问用户**
+
+```bash
+# 开发流程示例
+1. 开始任务: task-master set-status --id=LWP-2 --status=in-progress
+2. 实现功能: 编写代码
+3. 运行测试: pytest
+4. 提交变更: git commit -m "[LWP-2] 实现 XXX"
+5. 继续下一步: 重复 2-4 步骤
+6. 完成任务: task-master set-status --id=LWP-2 --status=done
+```
+
+#### 5.5 提交验证 (Commit Verification)
+**提交后立即验证**
+
+```bash
+# 验证提交是否成功
+git log -1
+
+# 验证文件是否已提交
+git diff HEAD
+
+# 验证任务状态
+task-master list
+```
+
 ## 重要决策记录
 
 ### 2024-01-08
