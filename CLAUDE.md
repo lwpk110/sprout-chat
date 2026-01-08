@@ -274,6 +274,107 @@ git diff HEAD
 task-master list
 ```
 
+### 6. 小芽自动化开发协议 ⚠️ **强制执行**
+
+**完整的自动化开发流程规范已确立，详见 [docs/development-guide.md](./docs/development-guide.md)**
+
+#### 6.1 核心协议
+
+本协议定义了小芽家教项目的自动化开发流程，确保所有功能开发遵循统一的、可追溯的、质量可控的开发规范。
+
+**四大核心原则**:
+1. **任务驱动** (Task-Driven): 所有开发通过 `tm autopilot start <taskId>` 启动
+2. **TDD 强制** (TDD-First): 强制遵循红灯-绿灯-重构循环
+3. **原子化提交** (Atomic Commits): 每个 TDD 阶段独立提交
+4. **环境感知** (Environment Aware): 记录关键配置 (Base URLs)
+
+#### 6.2 TDD 循环详解
+
+```
+Red (红灯) → Green (绿灯) → Refactor (重构)
+   ↓            ↓              ↓
+Commit       Commit         Commit
+  测试         功能           重构
+```
+
+**Red 阶段**:
+- 编写失败的测试用例
+- 包含教学逻辑断言 (如: 禁止直接给答案)
+- 运行 `pytest` 确认失败 ❌
+- 提交: `git commit -m "[LWP-X] test: XXX (Red)"`
+
+**Green 阶段**:
+- 编写最少代码让测试通过
+- 运行 `pytest` 确认通过 ✅
+- 提交: `git commit -m "[LWP-X] feat: XXX (Green)"`
+
+**Refactor 阶段**:
+- 优化代码质量，保持测试通过
+- 提交: `git commit -m "[LWP-X] refactor: XXX (Refactor)"`
+
+#### 6.3 环境配置要求
+
+**backend/.env 必须包含**:
+
+```bash
+# AI Provider
+AI_PROVIDER=openai
+AI_MODEL=glm-4.7
+
+# Base URLs (重要！兼容智谱 GLM)
+OPENAI_BASE_URL=https://open.bigmodel.cn/api/paas/v4/
+OPENAI_API_KEY=your_key_here
+```
+
+**为什么需要 Base URLs**:
+- 智谱 GLM 提供 OpenAI 兼容 API，必须设置 `OPENAI_BASE_URL`
+- 否则默认连接 `api.openai.com` 导致调用失败
+- 确保在所有环境下可访问 AI 服务
+
+#### 6.4 自动化工作流示例
+
+```bash
+# 1. 启动任务
+tm autopilot start LWP-2
+
+# 2. Red 阶段
+vim tests/test_feature.py
+pytest tests/test_feature.py  # ❌ 失败
+git add tests/test_feature.py
+git commit -m "[LWP-2] test: 添加功能测试 (Red)"
+
+# 3. Green 阶段
+vim backend/app/services/feature.py
+pytest tests/test_feature.py  # ✅ 通过
+git add backend/app/services/feature.py
+git commit -m "[LWP-2] feat: 实现功能 (Green)"
+
+# 4. Refactor (可选)
+vim backend/app/services/feature.py
+pytest tests/test_feature.py  # ✅ 仍通过
+git add backend/app/services/feature.py
+git commit -m "[LWP-2] refactor: 优化代码 (Refactor)"
+
+# 5. 完成任务
+tm autopilot complete LWP-2
+```
+
+#### 6.5 强制规则
+
+- ❌ **禁止**: 先写功能代码，再补测试
+- ❌ **禁止**: 一次性提交测试+功能代码
+- ❌ **禁止**: 跳过 Red 阶段直接写 Green
+- ❌ **禁止**: 不启动任务直接编码
+- ✅ **必须**: 每个阶段独立运行 `pytest`
+- ✅ **必须**: 每个阶段独立提交代码
+- ✅ **必须**: Commit message 标注阶段 (Red/Green/Refactor)
+- ✅ **必须**: 所有开发通过 `tm autopilot start <taskId>` 启动
+
+#### 6.6 完整文档
+
+详细的开发协议、示例代码、常见问题解答，请查看:
+📖 **[docs/development-guide.md](./docs/development-guide.md)**
+
 ## 重要决策记录
 
 ### 2024-01-08
