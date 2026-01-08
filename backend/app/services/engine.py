@@ -15,6 +15,7 @@ from app.services.sprout_persona import (
     get_sprout_prompt,
     format_conversation_history
 )
+from app.services.teaching_strategy import TeachingStrategySelector
 
 
 class ConversationEngine:
@@ -42,6 +43,7 @@ class ConversationEngine:
             self.openai_client = None
 
         self.conversations: Dict[str, Dict] = {}  # 会话存储
+        self.strategy_selector = TeachingStrategySelector()  # 教学策略选择器
 
     def create_session(
         self,
@@ -309,6 +311,52 @@ class ConversationEngine:
             "last_activity": session["last_activity"].isoformat(),
             "is_valid": self.is_session_valid(session_id)
         }
+
+    async def generate_response_async(
+        self,
+        session_id: str,
+        user_input: str,
+        use_guided: bool = True
+    ) -> str:
+        """
+        异步生成 AI 响应
+
+        Args:
+            session_id: 会话 ID
+            user_input: 用户输入
+            use_guided: 是否使用引导式教学
+
+        Returns:
+            AI 响应文本
+        """
+        # 对于同步的 generate_response 方法，我们这里简单封装
+        # 在实际应用中，可以使用真正的异步 AI SDK
+        import asyncio
+        return await asyncio.to_thread(
+            self.generate_response,
+            session_id,
+            user_input,
+            use_guided
+        )
+
+    async def get_conversation_history_async(
+        self,
+        session_id: str
+    ) -> List[Dict]:
+        """
+        异步获取对话历史
+
+        Args:
+            session_id: 会话 ID
+
+        Returns:
+            消息列表
+        """
+        import asyncio
+        return await asyncio.to_thread(
+            self.get_conversation_history,
+            session_id
+        )
 
 
 # 全局单例
