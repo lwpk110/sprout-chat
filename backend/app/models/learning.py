@@ -65,7 +65,7 @@ class LearningRecord(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
     class Config:
-        use_enum_values = True
+        pass
 
 
 class StudentProgress(BaseModel):
