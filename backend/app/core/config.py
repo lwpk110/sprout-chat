@@ -42,6 +42,11 @@ class Settings(BaseSettings):
     session_timeout_minutes: int = 30
     max_conversation_history: int = 10
 
+    # JWT 配置
+    secret_key: str = "your-secret-key-change-in-production"
+    ALGORITHM: str = "HS256"
+    access_token_expire_minutes: int = 60 * 24 * 7  # 7 天
+
     model_config = SettingsConfigDict(
         env_file=".env",
         case_sensitive=False,

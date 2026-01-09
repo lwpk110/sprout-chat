@@ -13,6 +13,7 @@ from app.api.conversations import router as conversations_router
 from app.api.images import router as images_router
 from app.api.learning import router as learning_router
 from app.api.parental import router as parental_router
+from app.api.auth import router as auth_router
 from app.services.engine import engine
 
 
@@ -49,6 +50,7 @@ app.include_router(conversations_router)
 app.include_router(images_router)
 app.include_router(learning_router)
 app.include_router(parental_router)
+app.include_router(auth_router)
 
 
 @app.get("/", tags=["root"])
