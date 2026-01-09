@@ -11,6 +11,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.conversations import router as conversations_router
 from app.api.images import router as images_router
+from app.api.learning import router as learning_router
 from app.services.engine import engine
 
 
@@ -45,6 +46,7 @@ app.add_middleware(
 # 注册路由
 app.include_router(conversations_router)
 app.include_router(images_router)
+app.include_router(learning_router)
 
 
 @app.get("/", tags=["root"])
