@@ -99,7 +99,7 @@ class ConversationMessage(Base):
     content = Column(Text, nullable=False)
 
     # 元数据
-    metadata = Column(JSON)  # 存储额外的对话信息
+    json_metadata = Column(JSON)  # 存储额外的对话信息
 
     # 时间戳
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -139,7 +139,7 @@ class LearningRecord(Base):
     metaphor_used = Column(String(50))
 
     # 元数据
-    metadata = Column(JSON)
+    json_metadata = Column(JSON)
 
     # 时间戳
     created_at = Column(DateTime, default=datetime.utcnow)

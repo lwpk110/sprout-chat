@@ -79,7 +79,7 @@ class AuthService:
         encoded_jwt = jwt.encode(
             to_encode,
             settings.secret_key,
-            algorithm=settings.alGORITHM
+            algorithm=settings.ALGORITHM
         )
 
         return encoded_jwt
@@ -108,25 +108,25 @@ class AuthService:
             payload = jwt.decode(
                 token,
                 settings.secret_key,
-                algorithms=[settings.alGORITHM]
+                algorithms=[settings.ALGORITHM]
             )
 
-            user_id: int = payload.get("sub")
+            user_id_str: str = payload.get("sub")
             username: str = payload.get("username")
             role: str = payload.get("role", UserRole.PARENT)
 
-            if user_id is None or username is None:
+            if user_id_str is None or username is None:
                 raise credentials_exception
 
             token_data = TokenData(
-                user_id=user_id,
+                user_id=int(user_id_str),
                 username=username,
                 role=role
             )
 
             return token_data
 
-        except JWTError:
+        except (JWTError, ValueError):
             raise credentials_exception
 
     @staticmethod

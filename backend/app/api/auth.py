@@ -11,7 +11,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.database import get_db
+from app.models.database import get_db
 from app.models.user import (
     UserRegister,
     UserLogin,
@@ -52,7 +52,7 @@ async def register(
     # 创建访问 Token
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
     access_token = AuthService.create_access_token(
-        data={"sub": user.id, "username": user.username, "role": "parent"},
+        data={"sub": str(user.id), "username": user.username, "role": "parent"},
         expires_delta=access_token_expires
     )
 
@@ -62,7 +62,7 @@ async def register(
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "user": UserResponse.from_orm(user)
+        "user": UserResponse.model_validate(user)
     }
 
 
@@ -99,7 +99,7 @@ async def login(
     # 创建访问 Token
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
     access_token = AuthService.create_access_token(
-        data={"sub": user.id, "username": user.username, "role": "parent"},
+        data={"sub": str(user.id), "username": user.username, "role": "parent"},
         expires_delta=access_token_expires
     )
 
@@ -109,7 +109,7 @@ async def login(
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "user": UserResponse.from_orm(user)
+        "user": UserResponse.model_validate(user)
     }
 
 
@@ -135,7 +135,7 @@ async def get_current_user(
             detail="用户不存在"
         )
 
-    return UserResponse.from_orm(user)
+    return UserResponse.model_validate(user)
 
 
 @router.post("/students", response_model=StudentResponse)
@@ -167,7 +167,7 @@ async def create_student(
     db.commit()
     db.refresh(db_student)
 
-    return StudentResponse.from_orm(db_student)
+    return StudentResponse.model_validate(db_student)
 
 
 @router.get("/students", response_model=List[StudentResponse])
@@ -189,7 +189,7 @@ async def get_students(
         Student.is_active == True
     ).all()
 
-    return [StudentResponse.from_orm(s) for s in students]
+    return [StudentResponse.model_validate(s) for s in students]
 
 
 @router.get("/health")

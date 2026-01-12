@@ -32,6 +32,8 @@ class UserLogin(BaseModel):
 
 class UserResponse(BaseModel):
     """用户响应"""
+    model_config = {"from_attributes": True}
+
     id: int
     username: str
     email: str
@@ -54,6 +56,8 @@ class StudentCreate(BaseModel):
 
 class StudentResponse(BaseModel):
     """学生响应"""
+    model_config = {"from_attributes": True}
+
     id: int
     parent_id: int
     name: str
