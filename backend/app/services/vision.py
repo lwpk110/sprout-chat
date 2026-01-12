@@ -23,15 +23,19 @@ class VisionService:
 
     def __init__(self):
         """初始化视觉服务"""
+        # 支持多种提供者，优先使用 openai 兼容接口
         if settings.ai_provider == "openai":
             self.client = OpenAI(
                 api_key=settings.openai_api_key,
                 base_url=settings.openai_base_url
             )
         else:
-            raise ValueError(f"Vision service requires 'openai' provider for GLM-4.6v, got '{settings.ai_provider}'")
+            # 对于其他提供者（如 anthropic），使用默认配置
+            # 在实际调用时会检查提供者类型
+            self.client = None
 
         self.vision_model = settings.ai_vision_model
+        self.provider = settings.ai_provider
 
     async def recognize_from_description(
         self,

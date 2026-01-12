@@ -66,3 +66,6 @@ session_records/
 # Reports (auto-generated, can be ignored)
 *_REPORT.md
 ITERATION_*.md
+sprout_chat.db
+test_*.db
+.claude/
