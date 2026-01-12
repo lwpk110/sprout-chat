@@ -213,7 +213,47 @@ Always run `pytest` after each phase.
 
 ---
 
-## 6. 参考资源
+## 6. 实施状态
+
+### 6.1 已实施的 Skills
+
+| Skill | 路径 | 状态 | 创建日期 |
+|-------|------|------|----------|
+| tdd循环 | `~/.claude/skills/tdd循环/SKILL.md` | ✅ 已完成 | 2026-01-12 |
+| git提交 | `~/.claude/skills/git提交/SKILL.md` | ✅ 已完成 | 2026-01-12 |
+| 小芽人格 | `~/.claude/skills/小芽人格/SKILL.md` | ✅ 已完成 | 2026-01-12 |
+| 教学策略 | `~/.claude/skills/教学策略/SKILL.md` | ✅ 已完成 | 2026-01-12 |
+| 苏格拉底引导 | `~/.claude/skills/苏格拉底引导/SKILL.md` | ✅ 已完成 | 2026-01-12 |
+| github同步 | `~/.claude/skills/github同步/SKILL.md` | ✅ 已完成 | 2026-01-12 |
+
+### 6.2 目录结构
+
+```
+~/.claude/skills/
+├── tdd循环/
+│   └── SKILL.md              # TDD 循环流程规范
+├── git提交/
+│   └── SKILL.md              # Git 提交规范
+├── 小芽人格/
+│   └── SKILL.md              # 小芽人格定义
+├── 教学策略/
+│   └── SKILL.md              # 问题分类和策略选择
+├── 苏格拉底引导/
+│   └── SKILL.md              # 引导式教学逻辑
+└── github同步/
+    └── SKILL.md              # GitHub-Taskmaster 同步规则
+```
+
+### 6.3 使用说明
+
+在对话中提及相关技能：
+- "使用 tdd 循环开发这个功能"
+- "按照 git提交 规范提交代码"
+- "根据 小芽人格 生成回复"
+
+---
+
+## 7. 参考资源
 
 - [Agent Skills 官方文档](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview)
 - [Agent Skills Cookbook](https://github.com/anthropics/claude-cookbooks/tree/main/skills)
