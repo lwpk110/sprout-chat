@@ -637,3 +637,25 @@ npm run lint
 
 ## Recent Changes
 - 001-learning-management: Added Python 3.11+ + FastAPI, SQLAlchemy, Pydantic v2, Claude API (Anthropic SDK)
+
+## GitHub MCP 集成
+
+### 状态
+**已集成 GitHub MCP**，所有任务完成后的 Commit 和 Issue 更新应通过此扩展自动化处理。
+
+### 安装命令
+```bash
+npm install -g @modelcontextprotocol/server-github
+```
+
+### 可用功能
+- 自动创建 Commit
+- 创建/关闭 Issue
+- 查看仓库状态
+- 管理 Pull Request
+
+### 权限验证
+仓库 `lwpk110/sprout-chat` 最近 3 条 Commit：
+1. `9e181f6`: docs: 添加项目 README 文档
+2. `0b7bcf5`: [LWP-2.2-T026] feat: 编写引导教学集成测试 (Green)
+3. `2a7d5c6`: [LWP-2.2-T025] feat: 实现引导教学 API 端点 (Green)
