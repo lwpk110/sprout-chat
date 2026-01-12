@@ -654,6 +654,27 @@ npm install -g @modelcontextprotocol/server-github
 - 查看仓库状态
 - 管理 Pull Request
 
+### ⚠️ 强制规范：GitHub 操作与 Taskmaster 同步
+
+**所有 GitHub 操作完成后必须同步更新 Taskmaster**
+
+#### 同步规则
+| GitHub 操作 | Taskmaster 动作 |
+|------------|----------------|
+| 创建 Issue | 创建对应任务或更新相关任务 |
+| 关闭 Issue | 更新任务状态为 done |
+| 合并 PR | 更新任务状态为 done |
+| 创建 Commit | 记录任务进度（可选） |
+
+#### 同步示例
+```bash
+# 创建 Issue 后，创建对应任务
+tm add-task --prompt="支持世界著名教育法 (#1)" --priority=P1
+
+# 关闭 Issue 后，更新任务状态
+tm set-status --id=LWP-X --status=done
+```
+
 ### 权限验证
 仓库 `lwpk110/sprout-chat` 最近 3 条 Commit：
 1. `9e181f6`: docs: 添加项目 README 文档
