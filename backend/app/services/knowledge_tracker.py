@@ -95,15 +95,11 @@ class KnowledgeTrackerService:
         # 获取前置知识点
         prerequisites = []
         if kp.prerequisites:
-            for prereq_id in kp.prerequisites:
-                prereq = db.query(KnowledgePoint).filter(
-                    KnowledgePoint.id == prereq_id
-                ).first()
-                if prereq:
-                    prerequisites.append({
-                        "id": prereq.id,
-                        "name": prereq.name
-                    })
+            for prereq in kp.prerequisites:
+                prerequisites.append({
+                    "id": prereq.id,
+                    "name": prereq.name
+                })
 
         # 获取子知识点
         children = db.query(KnowledgePoint).filter(
@@ -163,9 +159,9 @@ class KnowledgeTrackerService:
         edges = []
         for kp in knowledge_points:
             if kp.prerequisites:
-                for prereq_id in kp.prerequisites:
+                for prereq in kp.prerequisites:
                     edges.append({
-                        "from": prereq_id,
+                        "from": prereq.id,  # 从对象中提取 ID
                         "to": kp.id,
                         "type": "prerequisite"
                     })
@@ -465,7 +461,8 @@ class KnowledgeTrackerService:
             return True
 
         # 检查所有前置知识点掌握度 >= 80%
-        for prereq_id in knowledge_point.prerequisites:
+        for prereq in knowledge_point.prerequisites:
+            prereq_id = prereq.id  # 从对象中提取 ID
             mastery = mastery_map.get(prereq_id, 0)
             if mastery < 80:
                 return False
