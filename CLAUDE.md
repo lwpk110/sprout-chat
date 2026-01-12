@@ -23,7 +23,48 @@
 
 ## 开发方法论
 
-### Ralph Loop 迭代开发
+本项目采用 **规范驱动开发（SDD）** 方法论，结合任务管理和迭代开发。
+
+### 项目宪章 ⚖️ **最高优先级**
+
+**所有功能开发必须遵循项目宪章**
+
+#### 核心原则
+- **规范先于代码**: 没有规范不写代码
+- **质量不可妥协**: 测试覆盖率 ≥ 80%，所有测试必须通过
+- **用户价值至上**: 一年级学生认知能力优先
+- **透明可追溯**: 所有决策和变更有据可查
+
+#### 工作流程
+```
+需求分析 → 编写规范 → 规范审查 → 规范批准 → 创建实施计划 → 生成任务清单 → 执行实施（Ralph Loop） → 验证合规 → 标记完成
+```
+
+#### 项目宪章必读
+- ⚖️ **[项目宪章](./.specify/memory/constitution.md)** - 4 条核心价值观，6 条不可违反的原则
+- 📖 本文档下方有详细的工作流程说明
+
+#### 快速开始
+```bash
+# 1. 编写新规范（使用 Spec-Kit 命令）
+/speckit.specify "功能描述"
+
+# 2. 分析规范完整性
+/speckit.analyze
+
+# 3. 创建实施计划
+/speckit.plan
+
+# 4. 生成任务清单
+/speckit.tasks
+
+# 5. 启动 Ralph Loop 实施
+/ralph-loop "按规范实现功能"
+```
+
+---
+
+### 1. Ralph Loop 迭代开发
 
 本项目使用 **Ralph Loop** 插件进行迭代开发，这是基于 Ralph Wiggum 技术的 AI 原生开发方法。
 
@@ -31,18 +72,105 @@
 - **迭代改进**: 通过重复执行相同任务提示词，持续改进代码
 - **自引用**: Claude 通过文件和 git 历史看到自己的工作，进行迭代优化
 - **确定性失败**: 可预测的问题使得系统性改进成为可能
+- **规范驱动**: 每次迭代都遵循 Spec-Kit 规范
 
 #### 使用方法
-1. **启动循环**: `/ralph-loop "任务描述"`
-2. **迭代开发**: Claude 接收相同提示词，看到之前工作，持续改进
-3. **完成信号**: 输出 `<promise>完成描述</promise>` 标签
-4. **停止循环**: `/cancel-ralph`
+1. **编写规范**: 使用 `/speckit.specify "功能描述"` 生成规范
+2. **规范审查**: 确保规范符合项目宪章要求
+3. **启动循环**: `/ralph-loop "按规范实现功能"`
+4. **迭代开发**: Claude 接收提示词，阅读规范，持续改进
+5. **验证规范**: 确保代码符合规范要求
+6. **完成信号**: 输出 `<promise>完成描述</promise>` 标签
+7. **停止循环**: `/cancel-ralph`
 
 #### 当前迭代提示词
 详细的迭代任务请查看项目根目录的 `PROMPT.md`
 
 #### Ralph Loop 指南
 快速开始和最佳实践请查看 `RALPH_LOOP_GUIDE.md`
+
+#### 与规范驱动开发的集成
+- Ralph Loop 每次迭代开始时读取对应规范文档（使用 Spec-Kit 生成）
+- 实施过程遵循规范中的 API 定义、数据模型、业务逻辑
+- 完成后验证是否符合规范的完成标准
+- 遵循项目宪章的所有原则
+
+---
+
+### 2. Task-Master 任务管理
+
+Task-Master 负责任务的进度追踪和资源管理，与规范驱动开发互补。
+
+#### 功能边界
+| 维度 | Task-Master | 规范驱动开发 |
+|------|-------------|----------|
+| **职责** | 管理任务和进度 | 定义规范和标准 |
+| **关注点** | 什么时候做 | 怎么做 |
+| **核心问题** | What & When | How |
+| **时间维度** | ✅ 优先级、排期 | ❌ |
+| **技术维度** | ❌ | ✅ API、数据模型、测试 |
+
+#### 使用规范
+详见本文件"开发约定"部分的"1. Taskmaster 强制规范"
+
+#### 与规范驱动开发的协作
+```
+规范批准
+   ↓
+创建任务引用规范 (Task-Master)
+   ↓
+按规范实施 (Ralph Loop)
+   ↓
+验证符合规范
+   ↓
+标记任务完成 (Task-Master)
+```
+
+---
+
+### 三支柱协同示例
+
+**场景：实现学习记录 API**
+
+```bash
+# 第 1 步：编写规范（使用 Spec-Kit）
+/speckit.specify "实现学习记录 API，包括创建记录、查询进度、查询历史"
+# 填写：用户故事、功能需求、成功标准
+
+# 第 2 步：分析规范
+/speckit.analyze
+# ✅ 验证通过
+
+# 第 3 步：创建实施计划
+/speckit.plan
+
+# 第 4 步：生成任务清单
+/speckit.tasks
+
+# 第 5 步：启动任务（Task-Master）
+tm set-status --id=LWP-2.2.1 --status=in-progress
+
+# 第 6 步：启动 Ralph Loop 实施
+/ralph-loop "按规范实现学习记录 API"
+# Ralph Loop 会：
+# - 阅读规范文档
+# - 按规范实现 API（TDD）
+# - 验证符合规范
+
+# 第 7 步：标记完成
+tm set-status --id=LWP-2.2.1 --status=done
+```
+
+---
+
+### 开发方法论文档
+
+| 文档 | 用途 | 优先级 |
+|------|------|--------|
+| [项目宪章](./.specify/memory/constitution.md) | 最高原则，必须遵守 | ⚖️ P0 |
+| [Ralph Loop 指南](./RALPH_LOOP_GUIDE.md) | 迭代开发快速开始 | 🔄 P1 |
+| [Ralph Loop 配置](./RALPH_LOOP_SETUP.md) | 配置说明 | 🔧 P2 |
+| [开发协议](./docs/development-guide.md) | TDD 自动化流程 | 🚦 P0 |
 
 ## 代码风格规范
 
@@ -467,11 +595,37 @@ npm run lint
 - [ ] 建立内容审核机制
 
 ## 知识库链接
+
+### 项目文档
 - PRD 文档: [docs/PRD.md](./docs/PRD.md)
 - 教师人格规范: [docs/teacher-spec.md](./docs/teacher-spec.md)
 - 任务清单: [tasks.md](./tasks.md)
 
+### 规范驱动开发
+- ⚖️ **[项目宪章](./.specify/memory/constitution.md)** - 最高优先级，4 条核心价值观，6 条不可违反的原则
+
+### Ralph Loop 体系（迭代开发）
+- 🔄 **[Ralph Loop 指南](./RALPH_LOOP_GUIDE.md)** - 快速开始和最佳实践
+- ⚙️ **[Ralph Loop 配置](./RALPH_LOOP_SETUP.md)** - 配置说明和使用流程
+- 📝 **[迭代提示词](./PROMPT.md)** - 当前迭代任务详情
+
+### 开发协议
+- 🚦 **[开发协议](./docs/development-guide.md)** - TDD 自动化开发流程
+
+### 数据库设计
+- 🗄️ **[数据库设计](./docs/database_schema.md)** - 数据表结构和关系
+
+### 完成报告
+- ✅ **[Phase 2.1 完成报告](./PHASE2_1_COMPLETION_REPORT.md)** - 用户系统和数据库集成
+
 ## 更新日志
+
+### 2025-01-12
+- 创建项目宪章（.specify/memory/constitution.md）
+- 整合规范驱动开发方法论
+- 移除 docs/spec-kit/ 目录，统一使用 Spec-Kit 命令工具
+- 集成规范驱动开发、Task-Master、Ralph Loop 三支柱开发方法
+
 ### 2024-01-08
 - 初始化项目记忆中枢
 - 定义技术栈和代码规范
