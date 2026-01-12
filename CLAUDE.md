@@ -630,3 +630,10 @@ npm run lint
 - 初始化项目记忆中枢
 - 定义技术栈和代码规范
 - 记录重要设计决策
+
+## Active Technologies
+- Python 3.11+ + FastAPI, SQLAlchemy, Pydantic v2, Claude API (Anthropic SDK) (001-learning-management)
+- SQLite (开发) / PostgreSQL (生产) (001-learning-management)
+
+## Recent Changes
+- 001-learning-management: Added Python 3.11+ + FastAPI, SQLAlchemy, Pydantic v2, Claude API (Anthropic SDK)

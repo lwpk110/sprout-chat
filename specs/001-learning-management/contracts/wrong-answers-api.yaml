@@ -1,0 +1,565 @@
+openapi: 3.0.3
+info:
+  title: 小芽家教 - 错题本 API
+  description: |
+    错题本管理 API，用于记录、查询和练习错题，提供针对性的练习推荐。
+  version: 1.0.0
+  contact:
+    name: 小芽家教开发团队
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: 开发环境
+  - url: https://api.sproutchat.com/api/v1
+    description: 生产环境
+
+tags:
+  - name: Wrong Answers
+    description: 错题本管理
+  - name: Practice Recommendations
+    description: 练习推荐
+
+paths:
+  /wrong-answers:
+    get:
+      tags:
+        - Wrong Answers
+      summary: 查询错题列表
+      description: |
+        查询学生的错题列表，支持按科目、题型、错误类型、时间范围筛选。
+        家长只能查询自己孩子的错题。
+      operationId: listWrongAnswers
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: student_id
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: 学生 ID
+          example: 1
+        - name: subject
+          in: query
+          schema:
+            type: string
+            enum: [math, chinese, english]
+          description: 科目筛选
+          example: "math"
+        - name: question_type
+          in: query
+          schema:
+            type: string
+          description: 题型筛选
+          example: "addition"
+        - name: error_type
+          in: query
+          schema:
+            type: string
+            enum: [calculation, concept, understanding, careless]
+          description: 错误类型筛选
+          example: "calculation"
+        - name: is_resolved
+          in: query
+          schema:
+            type: boolean
+          description: 是否已解决（true=已解决，false=未解决）
+          example: false
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 开始日期（YYYY-MM-DD）
+          example: "2025-01-01"
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 结束日期（YYYY-MM-DD）
+          example: "2025-01-12"
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: 页码
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+          description: 每页数量
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    description: 总记录数
+                  page:
+                    type: integer
+                    description: 当前页码
+                  page_size:
+                    type: integer
+                    description: 每页数量
+                  records:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WrongAnswerResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /wrong-answers/{wrong_answer_id}:
+    get:
+      tags:
+        - Wrong Answers
+      summary: 获取错题详情
+      description: |
+        获取指定错题的详细信息，包括原始问题、学生答案、引导式反馈等。
+      operationId: getWrongAnswer
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: wrong_answer_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 错题记录 ID
+          example: 456
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WrongAnswerDetailResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    patch:
+      tags:
+        - Wrong Answers
+      summary: 更新错题状态
+      description: |
+        标记错题为已解决或未解决（学生重新答对或再次答错）。
+      operationId: updateWrongAnswer
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: wrong_answer_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 错题记录 ID
+          example: 456
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                is_resolved:
+                  type: boolean
+                  description: 是否已解决
+                  example: true
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WrongAnswerResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /wrong-answers/statistics:
+    get:
+      tags:
+        - Wrong Answers
+      summary: 获取错题统计
+      description: |
+        获取学生错题的统计数据，包括按错误类型分布、按题型分布等。
+      operationId: getWrongAnswerStatistics
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: student_id
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: 学生 ID
+          example: 1
+        - name: time_range
+          in: query
+          schema:
+            type: string
+            enum: [week, month, all]
+            default: all
+          description: 时间范围
+          example: "month"
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WrongAnswerStatisticsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /wrong-answers/recommendations:
+    get:
+      tags:
+        - Practice Recommendations
+      summary: 获取练习推荐
+      description: |
+        基于错题本生成针对性的练习推荐，推荐题目应与原错题相关但不完全相同。
+      operationId: getPracticeRecommendations
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: student_id
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: 学生 ID
+          example: 1
+        - name: error_type
+          in: query
+          schema:
+            type: string
+            enum: [calculation, concept, understanding, careless]
+          description: 按错误类型筛选推荐
+          example: "calculation"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 50
+          description: 推荐题目数量
+          example: 10
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PracticeRecommendationsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    WrongAnswerResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 错题记录 ID
+          example: 456
+        learning_record_id:
+          type: integer
+          description: 学习记录 ID
+          example: 123
+        question_content:
+          type: string
+          description: 问题内容
+          example: "3 + 5 = ?"
+        question_type:
+          type: string
+          description: 题型
+          example: "addition"
+        subject:
+          type: string
+          description: 科目
+          example: "math"
+        difficulty_level:
+          type: integer
+          description: 难度等级
+          example: 1
+        student_answer:
+          type: string
+          description: 学生答案
+          example: "7"
+        correct_answer:
+          type: string
+          description: 正确答案
+          example: "8"
+        error_type:
+          type: string
+          enum: [calculation, concept, understanding, careless]
+          description: 错误类型
+          example: "calculation"
+        guidance_type:
+          type: string
+          enum: [clarify, hint, break_down, visualize, check_work, alternative_method, encourage]
+          description: 引导类型
+          example: "hint"
+        guidance_content:
+          type: string
+          description: 引导式反馈内容
+          example: "让我来帮你检查一下。你一开始有 3 个苹果..."
+        is_resolved:
+          type: boolean
+          description: 是否已解决
+          example: false
+        created_at:
+          type: string
+          format: date-time
+          description: 创建时间
+          example: "2025-01-12T10:30:00Z"
+
+    WrongAnswerDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/WrongAnswerResponse'
+        - type: object
+          properties:
+            time_spent_seconds:
+              type: integer
+              description: 原始答题耗时（秒）
+              example: 20
+            resolved_at:
+              type: string
+              format: date-time
+              nullable: true
+              description: 解决时间
+              example: null
+            related_knowledge_points:
+              type: array
+              description: 相关知识点
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  name:
+                    type: string
+                    example: "10以内加法"
+
+    WrongAnswerStatisticsResponse:
+      type: object
+      properties:
+        student_id:
+          type: integer
+          example: 1
+        time_range:
+          type: string
+          example: "month"
+        total_wrong_answers:
+          type: integer
+          description: 总错题数
+          example: 20
+        unresolved_count:
+          type: integer
+          description: 未解决错题数
+          example: 15
+        resolved_count:
+          type: integer
+          description: 已解决错题数
+          example: 5
+        by_error_type:
+          type: array
+          description: 按错误类型统计
+          items:
+            type: object
+            properties:
+              error_type:
+                type: string
+                example: "calculation"
+              count:
+                type: integer
+                example: 10
+              percentage:
+                type: number
+                format: float
+                example: 50.0
+        by_question_type:
+          type: array
+          description: 按题型统计
+          items:
+            type: object
+            properties:
+              question_type:
+                type: string
+                example: "addition"
+              count:
+                type: integer
+                example: 12
+              percentage:
+                type: number
+                format: float
+                example: 60.0
+        by_difficulty_level:
+          type: array
+          description: 按难度等级统计
+          items:
+            type: object
+            properties:
+              difficulty_level:
+                type: integer
+                example: 1
+              count:
+                type: integer
+                example: 8
+              percentage:
+                type: number
+                format: float
+                example: 40.0
+
+    PracticeRecommendationsResponse:
+      type: object
+      properties:
+        student_id:
+          type: integer
+          example: 1
+        recommendations:
+          type: array
+          description: 推荐练习题列表
+          items:
+            type: object
+            properties:
+              priority:
+                type: string
+                enum: [high, medium, low]
+                description: 推荐优先级
+                example: "high"
+              reason:
+                type: string
+                description: 推荐理由
+                example: "该题型在最近一周错误率最高（60%），建议重点练习"
+              practice_question:
+                type: object
+                description: 推荐练习题（与原错题相关但不相同）
+                properties:
+                  question_content:
+                    type: string
+                    example: "4 + 6 = ?"
+                  question_type:
+                    type: string
+                    example: "addition"
+                  difficulty_level:
+                    type: integer
+                    example: 1
+                  subject:
+                    type: string
+                    example: "math"
+              related_wrong_answer_id:
+                type: integer
+                description: 相关的错题记录 ID
+                example: 456
+              knowledge_point_id:
+                type: integer
+                nullable: true
+                description: 相关知识点 ID
+                example: 1
+
+  responses:
+    BadRequest:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Invalid request parameters"
+
+    Unauthorized:
+      description: 未认证
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Not authenticated"
+
+    Forbidden:
+      description: 无权限访问
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "You do not have permission to access this resource"
+
+    NotFound:
+      description: 资源不存在
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Wrong answer record not found"
+
+    ValidationError:
+      description: 请求体验证错误
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    loc:
+                      type: array
+                      items:
+                        type: string
+                    msg:
+                      type: string
+                    type:
+                      type: string

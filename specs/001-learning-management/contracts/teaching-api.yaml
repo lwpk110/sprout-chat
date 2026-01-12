@@ -1,0 +1,394 @@
+openapi: 3.0.3
+info:
+  title: 小芽家教 - 苏格拉底式引导教学 API
+  description: |
+    苏格拉底式引导教学 API，用于在学生答错时生成引导式反馈，帮助学生自己思考并找到正确答案。
+  version: 1.0.0
+  contact:
+    name: 小芽家教开发团队
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: 开发环境
+  - url: https://api.sproutchat.com/api/v1
+    description: 生产环境
+
+tags:
+  - name: Teaching Guidance
+    description: 引导式教学
+
+paths:
+  /teaching/guidance:
+    post:
+      tags:
+        - Teaching Guidance
+      summary: 生成引导式反馈
+      description: |
+        当学生答错时，生成苏格拉底式引导反馈，通过提问引导学生自己思考，而不是直接给出答案。
+
+        **重要约束**：
+        - 引导式反馈不得包含直接答案
+        - 使用简单的语言（6-7岁儿童能理解）
+        - 每次只问1-2个问题
+        - 根据错误类型和答题历史选择合适的引导策略
+      operationId: generateGuidance
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateGuidanceRequest'
+            examples:
+              calculation_error:
+                summary: 计算错误示例
+                value:
+                  student_id: 1
+                  question_content: "3 + 5 = ?"
+                  question_type: "addition"
+                  student_answer: "7"
+                  correct_answer: "8"
+                  error_type: "calculation"
+                  recent_attempts:
+                    - answer: "6"
+                      is_correct: false
+                    - answer: "7"
+                      is_correct: false
+              concept_error:
+                summary: 概念错误示例
+                value:
+                  student_id: 1
+                  question_content: "3 × 4 = ?"
+                  question_type: "multiplication"
+                  student_answer: "7"
+                  correct_answer: "12"
+                  error_type: "concept"
+                  recent_attempts: []
+      responses:
+        '200':
+          description: 引导式反馈生成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuidanceResponse'
+              examples:
+                hint_guidance:
+                  summary: 提示型引导
+                  value:
+                    guidance_type: "hint"
+                    guidance_content: "让我来帮你检查一下。你一开始有 3 个苹果，妈妈又给了你 5 个，你能用手指或画图的方式数一数，一共有多少个苹果吗？"
+                    is_validated: true
+                    confidence_score: 0.95
+                visualize_guidance:
+                  summary: 可视化引导
+                  value:
+                    guidance_type: "visualize"
+                    guidance_content: "让我们画图来帮助理解。先画 3 个圆圈代表 3，再画 5 个圆圈代表 5，然后数数看一共有多少个圆圈？"
+                    is_validated: true
+                    confidence_score: 0.92
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/GenerationError'
+
+  /teaching/guidance/validate:
+    post:
+      tags:
+        - Teaching Guidance
+      summary: 验证引导式反馈
+      description: |
+        验证引导式反馈是否符合苏格拉底教学原则，确保不包含直接答案。
+        用于质量保证和测试。
+      operationId: validateGuidance
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidateGuidanceRequest'
+            examples:
+              valid_guidance:
+                summary: 有效引导示例
+                value:
+                  guidance_content: "让我来帮你检查一下。你一开始有 3 个苹果，妈妈又给了你 5 个，你能用手指或画图的方式数一数，一共有多少个苹果吗？"
+                  correct_answer: "8"
+              invalid_guidance:
+                summary: 无效引导示例（包含答案）
+                value:
+                  guidance_content: "不对，答案是 8。3 加 5 等于 8。"
+                  correct_answer: "8"
+      responses:
+        '200':
+          description: 验证完成
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /teaching/guidance/types:
+    get:
+      tags:
+        - Teaching Guidance
+      summary: 获取引导类型列表
+      description: |
+        获取所有可用的引导类型及其描述，用于前端展示和教育研究。
+      operationId: listGuidanceTypes
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  guidance_types:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GuidanceTypeInfo'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    GenerateGuidanceRequest:
+      type: object
+      required:
+        - student_id
+        - question_content
+        - question_type
+        - student_answer
+        - correct_answer
+        - error_type
+      properties:
+        student_id:
+          type: integer
+          description: 学生 ID
+          example: 1
+        question_content:
+          type: string
+          maxLength: 1000
+          description: 问题内容
+          example: "3 + 5 = ?"
+        question_type:
+          type: string
+          description: 题目类型
+          enum: [addition, subtraction, multiplication, division, word_problem]
+          example: "addition"
+        student_answer:
+          type: string
+          maxLength: 500
+          description: 学生答案
+          example: "7"
+        correct_answer:
+          type: string
+          maxLength: 500
+          description: 正确答案
+          example: "8"
+        error_type:
+          type: string
+          description: 错误类型
+          enum: [calculation, concept, understanding, careless]
+          example: "calculation"
+        recent_attempts:
+          type: array
+          description: 最近尝试记录（用于判断是否需要调整引导策略）
+          maxItems: 10
+          items:
+            type: object
+            properties:
+              answer:
+                type: string
+                example: "6"
+              is_correct:
+                type: boolean
+                example: false
+              timestamp:
+                type: string
+                format: date-time
+                example: "2025-01-12T10:25:00Z"
+
+    GuidanceResponse:
+      type: object
+      properties:
+        guidance_type:
+          type: string
+          description: 引导类型
+          enum: [clarify, hint, break_down, visualize, check_work, alternative_method, encourage]
+          example: "hint"
+        guidance_content:
+          type: string
+          description: 引导式反馈内容（简单语言，适合 6-7 岁儿童）
+          example: "让我来帮你检查一下。你一开始有 3 个苹果，妈妈又给了你 5 个，你能用手指或画图的方式数一数，一共有多少个苹果吗？"
+        is_validated:
+          type: boolean
+          description: 是否通过验证（不包含直接答案）
+          example: true
+        confidence_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: 置信度分数（0-1）
+          example: 0.95
+        suggested_follow_up:
+          type: string
+          nullable: true
+          description: 建议的后续引导策略（如果学生在引导后仍无法答对）
+          example: "如果学生仍然困惑，建议使用可视化引导（画图或实物演示）"
+
+    ValidateGuidanceRequest:
+      type: object
+      required:
+        - guidance_content
+        - correct_answer
+      properties:
+        guidance_content:
+          type: string
+          description: 待验证的引导式反馈内容
+          example: "让我来帮你检查一下。你一开始有 3 个苹果..."
+        correct_answer:
+          type: string
+          description: 正确答案（用于检测是否包含直接答案）
+          example: "8"
+
+    ValidationResult:
+      type: object
+      properties:
+        is_valid:
+          type: boolean
+          description: 是否通过验证（不包含直接答案）
+          example: true
+        violations:
+          type: array
+          description: 检测到的问题（如果有）
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum: [direct_answer, forbidden_pattern, complex_language, too_long]
+                example: "direct_answer"
+              message:
+                type: string
+                example: "Response contains direct answer: '答案是 8'"
+              location:
+                type: string
+                example: "guidance_content"
+        confidence_score:
+          type: number
+          format: float
+          description: 验证置信度（0-1）
+          example: 0.98
+
+    GuidanceTypeInfo:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "hint"
+        name:
+          type: string
+          example: "提示"
+        description:
+          type: string
+          example: "给出关键提示但不给答案，帮助学生找到解题思路"
+        applicable_scenarios:
+          type: array
+          description: 适用场景
+          items:
+            type: string
+          example: ["计算错误", "步骤遗漏"]
+        example:
+          type: string
+          example: "提示：先算 3 + 3 等于多少，再加 2 会是多少？"
+
+  responses:
+    BadRequest:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Invalid request parameters"
+
+    Unauthorized:
+      description: 未认证
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Not authenticated"
+
+    Forbidden:
+      description: 无权限访问
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "You do not have permission to access this resource"
+
+    ValidationError:
+      description: 请求体验证错误
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    loc:
+                      type: array
+                      items:
+                        type: string
+                    msg:
+                      type: string
+                    type:
+                      type: string
+
+    GenerationError:
+      description: 引导式反馈生成失败
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Failed to generate guidance. Please try again later."
+              error_code:
+                type: string
+                enum: [ai_service_unavailable, validation_failed, rate_limit_exceeded]
+                example: "ai_service_unavailable"

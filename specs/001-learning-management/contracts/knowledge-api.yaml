@@ -1,0 +1,632 @@
+openapi: 3.0.3
+info:
+  title: 小芽家教 - 知识点图谱 API
+  description: |
+    知识点图谱 API，用于建立一年级数学知识点结构、追踪学生掌握程度、推荐学习路径。
+  version: 1.0.0
+  contact:
+    name: 小芽家教开发团队
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: 开发环境
+  - url: https://api.sproutchat.com/api/v1
+    description: 生产环境
+
+tags:
+  - name: Knowledge Points
+    description: 知识点管理
+  - name: Knowledge Mastery
+    description: 知识点掌握追踪
+
+paths:
+  /knowledge-points:
+    get:
+      tags:
+        - Knowledge Points
+      summary: 查询知识点列表
+      description: |
+        查询知识点列表，支持按科目、难度等级筛选。
+      operationId: listKnowledgePoints
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: subject
+          in: query
+          schema:
+            type: string
+            enum: [math, chinese, english]
+          description: 科目筛选
+          example: "math"
+        - name: difficulty_level
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5
+          description: 难度等级筛选
+          example: 1
+        - name: include_dependencies
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: 是否包含前置知识点依赖关系
+          example: true
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    description: 总知识点数
+                  knowledge_points:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/KnowledgePointResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /knowledge-points/{knowledge_point_id}:
+    get:
+      tags:
+        - Knowledge Points
+      summary: 获取知识点详情
+      description: |
+        获取指定知识点的详细信息，包括前置知识点和后续知识点。
+      operationId: getKnowledgePoint
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: knowledge_point_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 知识点 ID
+          example: 5
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgePointDetailResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /knowledge-points/graph:
+    get:
+      tags:
+        - Knowledge Points
+      summary: 获取知识点图谱
+      description: |
+        获取完整的知识点依赖关系图（DAG），用于前端可视化展示。
+      operationId: getKnowledgeGraph
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: subject
+          in: query
+          schema:
+            type: string
+            enum: [math, chinese, english]
+          description: 科目筛选（默认全部科目）
+          example: "math"
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeGraphResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /knowledge-mastery:
+    get:
+      tags:
+        - Knowledge Mastery
+      summary: 查询学生知识点掌握情况
+      description: |
+        查询学生对各个知识点的掌握程度，支持按掌握状态筛选。
+      operationId: listKnowledgeMastery
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: student_id
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: 学生 ID
+          example: 1
+        - name: subject
+          in: query
+          schema:
+            type: string
+            enum: [math, chinese, english]
+          description: 科目筛选
+          example: "math"
+        - name: mastery_status
+          in: query
+          schema:
+            type: string
+            enum: [not_started, learning, mastered]
+          description: 掌握状态筛选
+          example: "learning"
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  mastery_records:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/KnowledgeMasteryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /knowledge-mastery/{mastery_id}:
+    get:
+      tags:
+        - Knowledge Mastery
+      summary: 获取知识点掌握详情
+      description: |
+        获取学生对指定知识点的掌握详情，包括历史练习记录。
+      operationId: getKnowledgeMastery
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: mastery_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 掌握记录 ID
+          example: 789
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeMasteryDetailResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    patch:
+      tags:
+        - Knowledge Mastery
+      summary: 更新知识点掌握度
+      description: |
+        手动更新知识点掌握度（通常由系统自动更新，此端点用于特殊场景）。
+      operationId: updateKnowledgeMastery
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: mastery_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 掌握记录 ID
+          example: 789
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mastery_percentage:
+                  type: number
+                  format: float
+                  minimum: 0
+                  maximum: 100
+                  example: 85.0
+                mastery_status:
+                  type: string
+                  enum: [not_started, learning, mastered]
+                  example: "mastered"
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeMasteryResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /knowledge-mastery/recommendations:
+    get:
+      tags:
+        - Knowledge Mastery
+      summary: 获取学习路径推荐
+      description: |
+        基于学生的知识点掌握情况，推荐下一步应该学习的知识点。
+        遵循前置知识点依赖关系，优先推荐前置知识点已掌握的知识点。
+      operationId: getLearningRecommendations
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: student_id
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: 学生 ID
+          example: 1
+        - name: subject
+          in: query
+          schema:
+            type: string
+            enum: [math, chinese, english]
+          description: 科目筛选
+          example: "math"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 5
+            minimum: 1
+            maximum: 20
+          description: 推荐数量
+          example: 5
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningRecommendationsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    KnowledgePointResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 5
+        name:
+          type: string
+          example: "20以内加法"
+        description:
+          type: string
+          nullable: true
+          example: "20以内的加法运算"
+        subject:
+          type: string
+          enum: [math, chinese, english]
+          example: "math"
+        difficulty_level:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 3
+
+    KnowledgePointDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/KnowledgePointResponse'
+        - type: object
+          properties:
+            prerequisites:
+              type: array
+              description: 前置知识点列表
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  name:
+                    type: string
+                    example: "10以内加法"
+                  difficulty_level:
+                    type: integer
+                    example: 2
+            dependents:
+              type: array
+              description: 后续知识点列表（依赖当前知识点的知识点）
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 6
+                  name:
+                    type: string
+                    example: "20以内减法"
+                  difficulty_level:
+                    type: integer
+                    example: 3
+
+    KnowledgeGraphResponse:
+      type: object
+      properties:
+        subject:
+          type: string
+          nullable: true
+          description: 科目筛选（null 表示全部科目）
+          example: "math"
+        nodes:
+          type: array
+          description: 知识点节点列表
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 5
+              name:
+                type: string
+                example: "20以内加法"
+              difficulty_level:
+                type: integer
+                example: 3
+              mastery_percentage:
+                type: number
+                format: float
+                nullable: true
+                description: 学生掌握度（如果提供 student_id）
+                example: 70.0
+        edges:
+          type: array
+          description: 知识点依赖关系边列表（从前置指向后续）
+          items:
+            type: object
+            properties:
+              from:
+                type: integer
+                description: 前置知识点 ID
+                example: 2
+              to:
+                type: integer
+                description: 后续知识点 ID
+                example: 5
+
+    KnowledgeMasteryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 789
+        student_id:
+          type: integer
+          example: 1
+        knowledge_point:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 5
+            name:
+              type: string
+              example: "20以内加法"
+            subject:
+              type: string
+              example: "math"
+            difficulty_level:
+              type: integer
+              example: 3
+        mastery_percentage:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          example: 70.0
+        questions_practiced:
+          type: integer
+          example: 15
+        questions_correct:
+          type: integer
+          example: 11
+        recent_performance:
+          type: number
+          format: float
+          nullable: true
+          description: 最近表现（最近10题正确率）
+          example: 75.0
+        mastery_status:
+          type: string
+          enum: [not_started, learning, mastered]
+          example: "learning"
+        last_practiced_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2025-01-12T10:30:00Z"
+
+    KnowledgeMasteryDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/KnowledgeMasteryResponse'
+        - type: object
+          properties:
+            knowledge_point_detail:
+              type: object
+              description: 知识点详细信息
+              properties:
+                prerequisites:
+                  type: array
+                  description: 前置知识点及其掌握情况
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      is_mastered:
+                        type: boolean
+                        description: 前置知识点是否已掌握
+                        example: true
+                      mastery_percentage:
+                        type: number
+                        format: float
+                        example: 90.0
+            recent_records:
+              type: array
+              description: 最近的学习记录
+              items:
+                type: object
+                properties:
+                  record_id:
+                    type: integer
+                  is_correct:
+                    type: boolean
+                  time_spent_seconds:
+                    type: integer
+                  created_at:
+                    type: string
+                    format: date-time
+
+    LearningRecommendationsResponse:
+      type: object
+      properties:
+        student_id:
+          type: integer
+          example: 1
+        subject:
+          type: string
+          example: "math"
+        recommendations:
+          type: array
+          description: 学习路径推荐（按优先级排序）
+          items:
+            type: object
+            properties:
+              knowledge_point:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 5
+                  name:
+                    type: string
+                    example: "20以内加法"
+                  difficulty_level:
+                    type: integer
+                    example: 3
+              priority:
+                type: string
+                enum: [high, medium, low]
+                description: 推荐优先级
+                example: "high"
+              reason:
+                type: string
+                description: 推荐理由
+                example: "所有前置知识点已掌握，建议开始学习本知识点"
+              prerequisites_met:
+                type: boolean
+                description: 前置知识点是否都已掌握
+                example: true
+              estimated_difficulty:
+                type: string
+                enum: [easy, moderate, challenging]
+                description: 预计难度（基于学生当前水平）
+                example: "moderate"
+
+  responses:
+    BadRequest:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Invalid request parameters"
+
+    Unauthorized:
+      description: 未认证
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Not authenticated"
+
+    Forbidden:
+      description: 无权限访问
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "You do not have permission to access this resource"
+
+    NotFound:
+      description: 资源不存在
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Knowledge point not found"
+
+    ValidationError:
+      description: 请求体验证错误
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    loc:
+                      type: array
+                      items:
+                        type: string
+                    msg:
+                      type: string
+                    type:
+                      type: string
