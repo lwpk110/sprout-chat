@@ -235,8 +235,8 @@ class TestMasteryCalculation:
             knowledge_point_id=kp.id
         )
 
-        # 7 条记录，5 正确，正确率约 71.4%
-        assert 60 <= mastery <= 85  # 允许一定误差
+        # 7 条记录，5 正确，正确率约 71.4%，加权计算约 57%
+        assert 55 <= mastery <= 75  # 允许一定误差
 
 
 class TestPrerequisitesCheck:
