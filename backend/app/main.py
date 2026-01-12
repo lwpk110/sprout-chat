@@ -16,6 +16,8 @@ from app.api.parental import router as parental_router
 from app.api.auth import router as auth_router
 from app.api.teaching import router as teaching_router
 from app.api.wrong_answers import router as wrong_answers_router
+from app.api.knowledge import router as knowledge_router
+from app.api.knowledge import mastery_router as knowledge_mastery_router
 from app.services.engine import engine
 
 
@@ -55,6 +57,8 @@ app.include_router(parental_router)
 app.include_router(auth_router)
 app.include_router(teaching_router)
 app.include_router(wrong_answers_router)
+app.include_router(knowledge_router)
+app.include_router(knowledge_mastery_router)
 
 
 @app.get("/", tags=["root"])
