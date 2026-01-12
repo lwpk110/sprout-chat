@@ -68,4 +68,7 @@ session_records/
 ITERATION_*.md
 sprout_chat.db
 test_*.db
+
+# .claude directory (except skills)
 .claude/
+!.claude/skills/
