@@ -142,6 +142,9 @@ class LearningRecord(Base):
     response_duration = Column(Float)  # 保留兼容性（秒）
     time_spent_seconds = Column(Integer, nullable=False)  # 答题耗时（秒）Phase 2.2
 
+    # 知识点关联（Phase 2.2）
+    knowledge_point_id = Column(Integer, ForeignKey("knowledge_points.id"), index=True)
+
     # 时间戳
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

@@ -147,10 +147,13 @@ class TestKnowledgeGraphStructure:
             name="进位加法",
             subject="math",
             difficulty_level=2,
-            description="20 以内的进位加法",
-            prerequisites=[kp1.id]
+            description="20 以内的进位加法"
         )
         db_session.add(kp2)
+        db_session.commit()
+
+        # 设置前置关系（通过 relationship）
+        kp2.prerequisites.append(kp1)
         db_session.commit()
 
         # 获取详情
@@ -266,10 +269,13 @@ class TestPrerequisitesCheck:
             name="进位加法",
             subject="math",
             difficulty_level=2,
-            description="20 以内的进位加法",
-            prerequisites=[kp1.id]
+            description="20 以内的进位加法"
         )
         db_session.add(kp2)
+        db_session.commit()
+
+        # 设置前置关系（通过 relationship）
+        kp2.prerequisites.append(kp1)
         db_session.commit()
 
         # 学生掌握前置知识点
