@@ -217,39 +217,40 @@ Always run `pytest` after each phase.
 
 ### 6.1 已实施的 Skills
 
-| Skill | 路径 | 状态 | 创建日期 |
+| Skill | 路径 | 状态 | 内容语言 |
 |-------|------|------|----------|
-| tdd循环 | `~/.claude/skills/tdd循环/SKILL.md` | ✅ 已完成 | 2026-01-12 |
-| git提交 | `~/.claude/skills/git提交/SKILL.md` | ✅ 已完成 | 2026-01-12 |
-| 小芽人格 | `~/.claude/skills/小芽人格/SKILL.md` | ✅ 已完成 | 2026-01-12 |
-| 教学策略 | `~/.claude/skills/教学策略/SKILL.md` | ✅ 已完成 | 2026-01-12 |
-| 苏格拉底引导 | `~/.claude/skills/苏格拉底引导/SKILL.md` | ✅ 已完成 | 2026-01-12 |
-| github同步 | `~/.claude/skills/github同步/SKILL.md` | ✅ 已完成 | 2026-01-12 |
+| tdd-cycle | `.claude/skills/tdd-cycle/SKILL.md` | ✅ 已完成 | 中文 |
+| git-commit | `.claude/skills/git-commit/SKILL.md` | ✅ 已完成 | 中文 |
+| sprout-persona | `.claude/skills/sprout-persona/SKILL.md` | ✅ 已完成 | 中文 |
+| teaching-strategy | `.claude/skills/teaching-strategy/SKILL.md` | ✅ 已完成 | 中文 |
+| socratic-teaching | `.claude/skills/socratic-teaching/SKILL.md` | ✅ 已完成 | 中文 |
+| github-sync | `.claude/skills/github-sync/SKILL.md` | ✅ 已完成 | 中文 |
 
 ### 6.2 目录结构
 
 ```
-~/.claude/skills/
-├── tdd循环/
-│   └── SKILL.md              # TDD 循环流程规范
-├── git提交/
-│   └── SKILL.md              # Git 提交规范
-├── 小芽人格/
-│   └── SKILL.md              # 小芽人格定义
-├── 教学策略/
-│   └── SKILL.md              # 问题分类和策略选择
-├── 苏格拉底引导/
-│   └── SKILL.md              # 引导式教学逻辑
-└── github同步/
-    └── SKILL.md              # GitHub-Taskmaster 同步规则
+.claude/skills/
+├── tdd-cycle/SKILL.md           # TDD 循环流程规范
+├── git-commit/SKILL.md          # Git 提交规范
+├── sprout-persona/SKILL.md      # 小芽人格定义
+├── teaching-strategy/SKILL.md   # 问题分类和策略选择
+├── socratic-teaching/SKILL.md   # 引导式教学逻辑
+├── github-sync/SKILL.md         # GitHub-Taskmaster 同步规则
+└── README.md                    # 说明文档
 ```
 
 ### 6.3 使用说明
 
 在对话中提及相关技能：
 - "使用 tdd 循环开发这个功能"
-- "按照 git提交 规范提交代码"
-- "根据 小芽人格 生成回复"
+- "按照 git-commit 规范提交代码"
+- "根据 sprout-persona 生成回复"
+
+### 6.4 配置说明
+
+- **位置**: 项目级 Skills 放在 `.claude/skills/`
+- **内容语言**: 支持中文内容（文件名和目录名用英文）
+- **Git 跟踪**: `.claude/skills/` 通过 .gitignore 规则被跟踪
 
 ---
 
