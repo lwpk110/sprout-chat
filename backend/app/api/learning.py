@@ -37,7 +37,7 @@ from app.models.learning_requests import (
 )
 
 
-router = APIRouter(prefix="/api/v1/learning", tags=["学习追踪"])
+router = APIRouter(prefix="/api/v1/learning", tags=["学习记录"])
 
 # 全局学习追踪器实例
 tracker = LearningTracker()
@@ -47,7 +47,7 @@ tracker = LearningTracker()
 # Phase 2.2: 新端点（数据库持久化）
 # =============================================================================
 
-@router.post("/records", response_model=LearningRecordResponse, status_code=201)
+@router.post("/records", response_model=LearningRecordResponse, status_code=201, tags=["学习记录"])
 async def create_learning_record(
     request: CreateLearningRecordRequest,
     db: Session = Depends(get_db)
@@ -56,7 +56,55 @@ async def create_learning_record(
     创建学习记录（Phase 2.2）
 
     记录一次答题活动，包含问题内容、学生答案、正确答案等信息。
-    如果学生答错，系统会自动创建错题记录。
+    如果学生答错，系统会自动创建错题记录并进行智能分类。
+
+    ## 功能说明
+
+    - 自动判断答案正确性
+    - 错误答案自动分类（计算错误、概念错误、理解错误、粗心错误）
+    - 自动创建错题记录
+    - 追踪学习时间和进度
+
+    ## 错误分类类型
+
+    - **calculation**: 计算错误（运算步骤正确但结果错误）
+    - **concept**: 概念错误（混淆运算方法）
+    - **understanding**: 理解错误（题意理解偏差）
+    - **careless**: 粗心错误（笔误、抄错数字）
+
+    ## 请求示例
+
+    ```json
+    {
+      "student_id": 1,
+      "question_content": "3 + 5 = ?",
+      "question_type": "addition",
+      "subject": "math",
+      "difficulty_level": 1,
+      "student_answer": "7",
+      "correct_answer": "8",
+      "time_spent_seconds": 15
+    }
+    ```
+
+    ## 响应示例
+
+    ```json
+    {
+      "id": 123,
+      "student_id": 1,
+      "question_content": "3 + 5 = ?",
+      "question_type": "addition",
+      "subject": "math",
+      "difficulty_level": 1,
+      "student_answer": "7",
+      "correct_answer": "8",
+      "is_correct": false,
+      "answer_result": "incorrect",
+      "time_spent_seconds": 15,
+      "created_at": "2026-01-12T10:30:00Z"
+    }
+    ```
     """
     # 判断答案是否正确
     is_correct = request.student_answer.strip() == request.correct_answer.strip()

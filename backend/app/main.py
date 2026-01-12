@@ -35,9 +35,86 @@ async def lifespan(app: FastAPI):
 # 创建 FastAPI 应用
 app = FastAPI(
     title=settings.app_name,
-    description="面向一年级学生的 AI-First 个性化家教助手",
+    description="""
+## 小芽家教 (SproutChat) API
+
+面向一年级学生的 AI-First 个性化家教助手。
+
+### 核心功能
+
+- **学习记录追踪**: 记录学生的学习活动，追踪学习进度
+- **苏格拉底式教学**: 通过引导式提问帮助学生思考，而非直接给答案
+- **错题本管理**: 智能分类错误类型，提供针对性练习推荐
+- **知识点图谱**: 追踪知识点掌握程度，生成个性化学习路径
+
+### 技术栈
+
+- **后端**: Python FastAPI
+- **AI 服务**: Claude API / 智谱 GLM
+- **数据库**: SQLite (开发) / PostgreSQL (生产)
+
+### 认证
+
+大部分 API 端点需要 Bearer Token 认证。请在请求头中包含：
+```
+Authorization: Bearer <your_token>
+```
+
+### 错误处理
+
+API 使用标准 HTTP 状态码：
+- `200`: 成功
+- `201`: 创建成功
+- `400`: 请求参数错误
+- `401`: 未授权
+- `404`: 资源不存在
+- `500`: 服务器错误
+
+错误响应格式：
+```json
+{
+  "detail": "错误描述信息"
+}
+```
+""",
     version=settings.app_version,
-    lifespan=lifespan
+    lifespan=lifespan,
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_tags=[
+        {
+            "name": "学习记录",
+            "description": "学习活动记录和进度追踪"
+        },
+        {
+            "name": "苏格拉底教学",
+            "description": "引导式教学和反馈生成"
+        },
+        {
+            "name": "错题本",
+            "description": "错题管理和练习推荐"
+        },
+        {
+            "name": "知识点图谱",
+            "description": "知识点追踪和掌握度分析"
+        },
+        {
+            "name": "认证",
+            "description": "用户注册和登录"
+        },
+        {
+            "name": "对话",
+            "description": "师生对话交互"
+        },
+        {
+            "name": "图像识别",
+            "description": "题目图片识别"
+        },
+        {
+            "name": "家长监控",
+            "description": "学习数据查看和统计"
+        }
+    ]
 )
 
 # 配置 CORS

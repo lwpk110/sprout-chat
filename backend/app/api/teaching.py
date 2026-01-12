@@ -13,7 +13,7 @@ from app.services.wrong_analyzer import WrongAnswerClassifier
 from app.services.response_validator import ResponseValidator
 
 
-router = APIRouter(prefix="/api/v1/teaching", tags=["引导教学"])
+router = APIRouter(prefix="/api/v1/teaching", tags=["苏格拉底教学"])
 
 # 服务实例
 socratic_service = SocraticTeacherService()
