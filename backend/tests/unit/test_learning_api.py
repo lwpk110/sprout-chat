@@ -42,7 +42,7 @@ def client(db_session: Session):
         finally:
             pass
 
-    from app.api.learning import get_db
+    from app.models.database import get_db
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as test_client:
         yield test_client
@@ -169,6 +169,7 @@ class TestLearningRecordAPI:
             student_answer="8",
             correct_answer="8",
             is_correct=True,
+            answer_result="correct",
             time_spent_seconds=15,
             created_at=datetime(2025, 1, 10, 10, 0, 0),
         )
@@ -181,6 +182,7 @@ class TestLearningRecordAPI:
             student_answer="7",
             correct_answer="7",
             is_correct=True,
+            answer_result="correct",
             time_spent_seconds=20,
             created_at=datetime(2025, 1, 12, 10, 0, 0),
         )
@@ -227,6 +229,7 @@ class TestLearningRecordAPI:
                     student_answer="correct",
                     correct_answer="correct",
                     is_correct=True,
+                    answer_result="correct",
                     time_spent_seconds=15 + i,
                 )
             )
@@ -241,6 +244,7 @@ class TestLearningRecordAPI:
                     student_answer="wrong",
                     correct_answer="correct",
                     is_correct=False,
+                    answer_result="incorrect",
                     time_spent_seconds=20 + i,
                 )
             )
@@ -279,6 +283,7 @@ class TestLearningRecordAPI:
                     student_answer="correct",
                     correct_answer="correct",
                     is_correct=True,
+                    answer_result="correct",
                     time_spent_seconds=15,
                     created_at=datetime(2025, 1, 10, 10, 0, 0),
                 )
@@ -294,6 +299,7 @@ class TestLearningRecordAPI:
                     student_answer="correct",
                     correct_answer="correct",
                     is_correct=True,
+                    answer_result="correct",
                     time_spent_seconds=20,
                     created_at=datetime(2025, 1, 12, 10, 0, 0),
                 )
@@ -327,6 +333,7 @@ class TestLearningRecordAPI:
             student_answer="8",
             correct_answer="8",
             is_correct=True,
+            answer_result="correct",
             time_spent_seconds=15,
         )
         db_session.add(record)
