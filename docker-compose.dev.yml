@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # 开发环境 FastAPI 应用
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sprout-chat-api-dev
+    environment:
+      # 开发环境配置
+      ENVIRONMENT: development
+      DEBUG: "true"
+
+      # SQLite 数据库
+      DATABASE_URL: sqlite:///./sprout_chat.db
+
+      # 安全配置
+      SECRET_KEY: dev-secret-key-for-testing-only
+      CORS_ORIGINS: '["http://localhost:3000", "http://localhost:5173"]'
+
+      # AI 配置
+      AI_PROVIDER: openai
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_BASE_URL: https://open.bigmodel.cn/api/paas/v4/
+
+      # 日志配置
+      LOG_LEVEL: DEBUG
+    volumes:
+      # 挂载源代码（热重载）
+      - ./backend:/home/sprout/app
+      - ./logs:/home/sprout/app/logs
+    ports:
+      - "8000:8000"
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    networks:
+      - sprout-network
+    restart: unless-stopped
+
+networks:
+  sprout-network:
+    driver: bridge

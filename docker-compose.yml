@@ -1,0 +1,121 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:16-alpine
+    container_name: sprout-chat-db
+    environment:
+      POSTGRES_DB: sprout_chat
+      POSTGRES_USER: sprout_user
+      POSTGRES_PASSWORD: sprout_password_change_me
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sprout_user -d sprout_chat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sprout-network
+    restart: unless-stopped
+
+  # Redis 缓存（可选）
+  redis:
+    image: redis:7-alpine
+    container_name: sprout-chat-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sprout-network
+    restart: unless-stopped
+
+  # FastAPI 应用
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sprout-chat-api
+    environment:
+      # 环境配置
+      ENVIRONMENT: production
+      DEBUG: "false"
+
+      # 数据库配置
+      DATABASE_URL: postgresql://sprout_user:sprout_password_change_me@postgres:5432/sprout_chat
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: sprout_user
+      DB_PASSWORD: sprout_password_change_me
+      DB_NAME: sprout_chat
+
+      # Redis 配置
+      REDIS_URL: redis://redis:6379/0
+      CACHE_ENABLED: "true"
+
+      # 安全配置
+      SECRET_KEY: ${SECRET_KEY:-change-this-secret-key-in-production}
+      CORS_ORIGINS: '["http://localhost:3000"]'
+
+      # AI 配置
+      AI_PROVIDER: openai
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_BASE_URL: https://open.bigmodel.cn/api/paas/v4/
+
+      # 日志配置
+      LOG_LEVEL: INFO
+    volumes:
+      - ./logs:/home/sprout/app/logs
+      - ./uploads:/home/sprout/app/uploads
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - sprout-network
+    restart: unless-stopped
+
+  # Nginx 反向代理（可选）
+  nginx:
+    image: nginx:alpine
+    container_name: sprout-chat-nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - api
+    networks:
+      - sprout-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  sprout-network:
+    driver: bridge
