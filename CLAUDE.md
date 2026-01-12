@@ -625,6 +625,8 @@ npm run lint
 - 整合规范驱动开发方法论
 - 移除 docs/spec-kit/ 目录，统一使用 Spec-Kit 命令工具
 - 集成规范驱动开发、Task-Master、Ralph Loop 三支柱开发方法
+- 创建 Issue #1: 支持世界著名教育法（苏格拉底法、哈克尼斯法、探究式教学、显性思维）
+- GitHub MCP 与 Taskmaster 同步规范生效
 
 ### 2024-01-08
 - 初始化项目记忆中枢
