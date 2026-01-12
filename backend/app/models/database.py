@@ -319,6 +319,9 @@ class KnowledgePoint(Base):
     subject = Column(String(50), nullable=False, index=True)  # math, chinese, english
     difficulty_level = Column(Integer, nullable=False)  # 1-5
 
+    # 层级关系（父子知识点）
+    parent_id = Column(Integer, ForeignKey("knowledge_points.id"), index=True)
+
     # 时间戳
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -342,13 +345,14 @@ class KnowledgeMastery(Base):
     knowledge_point_id = Column(Integer, ForeignKey("knowledge_points.id"), nullable=False, index=True)
 
     # 掌握度
-    mastery_percentage = Column(Integer, nullable=False)  # 0-100
+    mastery_percentage = Column(Float, nullable=False)  # 0-100 (改为 Float 支持小数)
     questions_practiced = Column(Integer, default=0, nullable=False)
     questions_correct = Column(Integer, default=0, nullable=False)
     recent_performance = Column(Integer)  # 最近表现（最近10题的正确率，0-100）
 
     # 掌握状态
     mastery_status = Column(String(50), default="not_started", nullable=False, index=True)  # not_started, learning, mastered
+    status = Column(String(50), default="not_started", nullable=False)  # 别名，兼容性
 
     # 时间信息
     last_practiced_at = Column(DateTime, index=True)
@@ -360,6 +364,10 @@ class KnowledgeMastery(Base):
         # TODO: Add unique constraint for (student_id, knowledge_point_id) in Alembic migration
         # UniqueConstraint('student_id', 'knowledge_point_id', name='uq_student_knowledge'),
     )
+
+
+# 别名：KnowledgePointMastery = KnowledgeMastery（兼容性）
+KnowledgePointMastery = KnowledgeMastery
 
 
 class KnowledgePointDependency(Base):
