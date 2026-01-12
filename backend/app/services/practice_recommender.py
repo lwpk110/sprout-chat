@@ -44,8 +44,9 @@ class PracticeRecommenderService:
         Returns:
             分页的错题列表
         """
-        query = db.query(WrongAnswerRecord).filter(
-            WrongAnswerRecord.student_id == student_id
+        # 通过 JOIN LearningRecord 来访问 student_id
+        query = db.query(WrongAnswerRecord).join(LearningRecord).filter(
+            LearningRecord.student_id == student_id
         )
 
         # 应用筛选条件
@@ -66,15 +67,16 @@ class PracticeRecommenderService:
         # 转换为字典
         wrong_answers_data = []
         for wa in wrong_answers:
+            lr = wa.learning_record  # 获取关联的学习记录
             wrong_answers_data.append({
                 "id": wa.id,
-                "student_id": wa.student_id,
-                "question_content": wa.question_content,
-                "student_answer": wa.student_answer,
-                "correct_answer": wa.correct_answer,
+                "student_id": lr.student_id,  # 从学习记录获取
+                "question_content": lr.question_content,
+                "student_answer": lr.student_answer,
+                "correct_answer": lr.correct_answer,
                 "error_type": wa.error_type,
                 "is_resolved": wa.is_resolved,
-                "attempts_count": wa.attempts_count,
+                "attempts_count": lr.attempts,  # 从学习记录获取
                 "created_at": wa.created_at.isoformat() if wa.created_at else None
             })
 
@@ -114,16 +116,16 @@ class PracticeRecommenderService:
 
         return {
             "id": wrong_answer.id,
-            "student_id": wrong_answer.student_id,
-            "question_content": wrong_answer.question_content,
-            "student_answer": wrong_answer.student_answer,
-            "correct_answer": wrong_answer.correct_answer,
+            "student_id": learning_record.student_id,  # 从学习记录获取
+            "question_content": learning_record.question_content,
+            "student_answer": learning_record.student_answer,
+            "correct_answer": learning_record.correct_answer,
             "error_type": wrong_answer.error_type,
             "guidance_type": wrong_answer.guidance_type,
             "guidance_content": wrong_answer.guidance_content,
             "is_resolved": wrong_answer.is_resolved,
-            "attempts_count": wrong_answer.attempts_count,
-            "last_attempt_at": wrong_answer.last_attempt_at.isoformat() if wrong_answer.last_attempt_at else None,
+            "attempts_count": learning_record.attempts,  # 从学习记录获取
+            "last_attempt_at": learning_record.created_at.isoformat() if learning_record.created_at else None,  # 使用学习记录的时间
             "created_at": wrong_answer.created_at.isoformat() if wrong_answer.created_at else None
         }
 
@@ -180,9 +182,9 @@ class PracticeRecommenderService:
         Returns:
             错题统计数据
         """
-        # 获取所有错题
-        wrong_answers = db.query(WrongAnswerRecord).filter(
-            WrongAnswerRecord.student_id == student_id
+        # 通过 JOIN 获取所有错题
+        wrong_answers = db.query(WrongAnswerRecord).join(LearningRecord).filter(
+            LearningRecord.student_id == student_id
         ).all()
 
         total = len(wrong_answers)
@@ -235,12 +237,12 @@ class PracticeRecommenderService:
         Returns:
             练习推荐列表
         """
-        # 获取未解决的错题
-        wrong_answers = db.query(WrongAnswerRecord).filter(
-            WrongAnswerRecord.student_id == student_id,
+        # 通过 JOIN 获取未解决的错题
+        wrong_answers = db.query(WrongAnswerRecord).join(LearningRecord).filter(
+            LearningRecord.student_id == student_id,
             WrongAnswerRecord.is_resolved == False
         ).order_by(
-            WrongAnswerRecord.attempts_count.desc(),
+            LearningRecord.attempts.desc(),  # 使用学习记录的字段
             WrongAnswerRecord.created_at.desc()
         ).limit(limit).all()
 
@@ -310,7 +312,9 @@ class PracticeRecommenderService:
         """
         import re
 
-        question = wrong_answer.question_content
+        # 从学习记录获取题目信息
+        lr = wrong_answer.learning_record
+        question = lr.question_content
 
         # 提取题目中的数字
         numbers = re.findall(r'\d+', question)
@@ -321,9 +325,9 @@ class PracticeRecommenderService:
         n1, n2 = int(numbers[0]), int(numbers[1])
 
         # 简单的数字变换逻辑
-        if wrong_answer.question_type == "addition":
+        if lr.question_type == "addition":
             new_n1, new_n2 = max(1, n1 - 1), min(10, n2 + 1)
-        elif wrong_answer.question_type == "subtraction":
+        elif lr.question_type == "subtraction":
             new_n1, new_n2 = max(5, n1 + 1), min(5, n2 - 1)
         else:
             new_n1, new_n2 = n1, n2
@@ -336,8 +340,8 @@ class PracticeRecommenderService:
         return {
             "id": wrong_answer.id * 1000 + 1,  # 模拟 ID
             "question_content": new_question,
-            "difficulty_level": wrong_answer.difficulty_level,
-            "question_type": wrong_answer.question_type
+            "difficulty_level": lr.difficulty_level,
+            "question_type": lr.question_type
         }
 
     def _determine_priority(self, error_type: str, count: int) -> str:
