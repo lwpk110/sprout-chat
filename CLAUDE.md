@@ -723,3 +723,116 @@ tm set-status --id=LWP-X --status=done
 ### 文档参考
 - [Agent Skills 官方文档](https://code.claude.com/docs/en/skills)
 - [Agent Skills 研究报告](../docs/agent-skills-research.md)
+
+---
+
+## Sub-Agents Orchestration
+
+### 概述
+本项目配置了 6 个专业 Sub-Agents，形成完整的自动化开发团队。各角色通过规范化的交接流程协作。
+
+### 团队角色
+
+| Agent | 文件 | 核心职责 |
+|-------|------|----------|
+| **PM** | [.claude/agents/pm.md](.claude/agents/pm.md) | 任务分发、进度跟踪、Issue 闭环 |
+| **Librarian** | [.claude/agents/librarian.md](.claude/agents/librarian.md) | 规范维护、需求分析、合规验证 |
+| **Backend Dev** | [.claude/agents/backend-dev.md](.claude/agents/backend-dev.md) | FastAPI 开发、AI 集成、数据库 |
+| **Frontend Dev** | [.claude/agents/frontend-dev.md](.claude/agents/frontend-dev.md) | React 开发、UI 组件、API 对接 |
+| **QA** | [.claude/agents/qa.md](.claude/agents/qa.md) | 测试设计、红绿测试、覆盖率验证 |
+| **SRE** | [.claude/agents/sre.md](.claude/agents/sre.md) | 环境配置、Docker、CI/CD |
+
+### 协作流程
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        开发协作流水线                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   [需求]                                                        │
+│     │                                                          │
+│     ▼                                                          │
+│   ┌─────────┐     ┌─────────┐     ┌─────────┐     ┌─────────┐ │
+│   │   PM    │────▶│Librarian│────▶│   QA    │────▶│   Dev   │ │
+│   │ 项目管理 │     │ 规范审查 │     │ 测试设计 │     │ 代码实现 │ │
+│   └─────────┘     └─────────┘     └─────────┘     └─────────┘ │
+│        │               │               │               │        │
+│        │               ▼               │               ▼        │
+│        │        ┌─────────┐            │        ┌─────────┐    │
+│        │        │ Task-   │            │        │  Git    │    │
+│        │        │ master  │            │        │ Commit  │    │
+│        │        └─────────┘            │        └─────────┘    │
+│        │                               │               │        │
+│        │                               │               ▼        │
+│        │                               │        ┌─────────┐    │
+│        │                               │        │   SRE   │    │
+│        │                               │        │ CI/CD   │    │
+│        │                               │        └─────────┘    │
+│        │                               │               │        │
+│        │                               │               ▼        │
+│        │                               │        ┌─────────┐    │
+│        │                               └───────▶│   PM    │    │
+│        │                                Issue   │  闭环   │    │
+│        │                                关闭    └─────────┘    │
+│        │                                               │        │
+│        ▼                                               ▼        │
+│   ┌───────────────────────────────────────────────────────┐    │
+│   │                    完成 ✓                              │    │
+│   └───────────────────────────────────────────────────────┘    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 交接协议
+
+#### 1. PM → Librarian（需求分发）
+- PM 解析用户需求
+- 创建 Taskmaster 任务
+- 通知 Librarian 开始规范工作
+
+#### 2. Librarian → QA（规范输出）
+- Librarian 输出规范文件
+- 包含 API 定义、数据模型
+- 交给 QA 设计测试
+
+#### 3. QA → Dev（测试交接）
+- QA 生成红灯测试
+- Dev 接收测试开始实现
+- 测试通过后 QA 验证
+
+#### 4. Dev → SRE（代码提交）
+- Dev 提交代码
+- SRE 触发 CI/CD
+- 构建测试通过后部署
+
+#### 5. 各角色 → PM（闭环）
+- 任务完成后通知 PM
+- PM 更新任务状态
+- PM 关闭 GitHub Issue
+
+### 调用方式
+
+在对话中使用 `@agent-name` 调用：
+```
+@pm 分发一个新任务：实现用户认证
+@librarian 审查这个规范并输出合规报告
+@backend-dev 按照 TDD 流程实现用户认证 API
+@qa 为用户认证功能设计测试用例
+@sre 验证 CI/CD 配置
+```
+
+### 文件结构
+```
+.claude/agents/
+├── README.md              # 团队说明
+├── pm.md                  # 项目经理
+├── librarian.md           # 规范馆长
+├── backend-dev.md         # 后端开发
+├── frontend-dev.md        # 前端开发
+├── qa.md                  # 质量保障
+└── sre.md                 # 运维专家
+```
+
+### 文档参考
+- [Sub-Agents 官方文档](https://code.claude.com/docs/en/sub-agents)
+
