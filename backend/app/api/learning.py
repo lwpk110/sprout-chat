@@ -84,11 +84,20 @@ async def create_learning_record(
 
     # 如果答错，创建错题记录
     if not is_correct:
-        # TODO: 实现错误分类和引导式反馈生成
+        # 使用错误分类器判断错误类型
+        from app.services.wrong_analyzer import WrongAnswerClassifier
+        classifier = WrongAnswerClassifier()
+        error_type = classifier.classify(
+            question=request.question_content,
+            student_answer=request.student_answer,
+            correct_answer=request.correct_answer,
+            attempts=1
+        )
+
         wrong_record = WrongAnswerRecordModel(
             learning_record_id=record.id,
-            error_type="calculation",  # TODO: 使用错误分类器
-            guidance_type="hint",  # TODO: 使用引导类型选择器
+            error_type=error_type,
+            guidance_type="hint",  # TODO: 根据错误类型和尝试次数选择引导类型
             guidance_content="让我来帮你检查一下。你一开始有 3 个苹果，妈妈又给了你 5 个，你能用手指或画图的方式数一数，一共有多少个苹果吗？",
             is_resolved=False,
             created_at=datetime.utcnow(),

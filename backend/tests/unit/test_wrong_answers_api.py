@@ -22,12 +22,10 @@ class TestGetWrongAnswersList:
         那么系统应返回分页的错题列表
         """
         # Mock the service layer
-        with patch('app.api.wrong_answers.PracticeRecommenderService') as mock_service:
-            mock_instance = Mock()
-            mock_service.return_value = mock_instance
+        with patch('app.api.wrong_answers.practice_service') as mock_service:
 
             # Mock wrong answers query
-            mock_instance.get_wrong_answers.return_value = {
+            mock_service.get_wrong_answers.return_value = {
                 "total": 2,
                 "page": 1,
                 "page_size": 10,
@@ -73,19 +71,22 @@ class TestGetWrongAnswersList:
         给定请求包含错误类型和解决状态筛选
         那么系统应返回符合筛选条件的错题
         """
-        with patch('app.api.wrong_answers.PracticeRecommenderService') as mock_service:
-            mock_instance = Mock()
-            mock_service.return_value = mock_instance
+        with patch('app.api.wrong_answers.practice_service') as mock_service:
 
-            mock_instance.get_wrong_answers.return_value = {
+            mock_service.get_wrong_answers.return_value = {
                 "total": 1,
                 "page": 1,
                 "page_size": 10,
                 "wrong_answers": [
                     {
                         "id": 1,
+                        "student_id": 1,
+                        "question_content": "2 + 3 = ?",
+                        "student_answer": "4",
+                        "correct_answer": "5",
                         "error_type": "calculation",
-                        "is_resolved": False
+                        "is_resolved": False,
+                        "attempts_count": 1
                     }
                 ]
             }
@@ -109,11 +110,9 @@ class TestGetWrongAnswerDetail:
         给定错题记录 ID
         那么系统应返回该错题的详细信息
         """
-        with patch('app.api.wrong_answers.PracticeRecommenderService') as mock_service:
-            mock_instance = Mock()
-            mock_service.return_value = mock_instance
+        with patch('app.api.wrong_answers.practice_service') as mock_service:
 
-            mock_instance.get_wrong_answer_detail.return_value = {
+            mock_service.get_wrong_answer_detail.return_value = {
                 "id": 1,
                 "student_id": 1,
                 "question_content": "3 + 5 = ?",
@@ -144,11 +143,9 @@ class TestGetWrongAnswerDetail:
         给定错题记录不存在
         那么系统应返回 404 错误
         """
-        with patch('app.api.wrong_answers.PracticeRecommenderService') as mock_service:
-            mock_instance = Mock()
-            mock_service.return_value = mock_instance
+        with patch('app.api.wrong_answers.practice_service') as mock_service:
 
-            mock_instance.get_wrong_answer_detail.return_value = None
+            mock_service.get_wrong_answer_detail.return_value = None
 
             response = client.get("/api/v1/wrong-answers/999")
 
@@ -166,11 +163,9 @@ class TestUpdateWrongAnswerStatus:
         给定学生答对了之前的错题
         那么系统应更新错题状态为已解决
         """
-        with patch('app.api.wrong_answers.PracticeRecommenderService') as mock_service:
-            mock_instance = Mock()
-            mock_service.return_value = mock_instance
+        with patch('app.api.wrong_answers.practice_service') as mock_service:
 
-            mock_instance.update_wrong_answer_status.return_value = {
+            mock_service.update_wrong_answer_status.return_value = {
                 "id": 1,
                 "is_resolved": True,
                 "resolved_at": "2026-01-12T11:00:00"
@@ -213,11 +208,9 @@ class TestGetWrongAnswerStatistics:
         给定学生有多条错题记录
         那么系统应返回按错误类型分组的统计数据
         """
-        with patch('app.api.wrong_answers.PracticeRecommenderService') as mock_service:
-            mock_instance = Mock()
-            mock_service.return_value = mock_instance
+        with patch('app.api.wrong_answers.practice_service') as mock_service:
 
-            mock_instance.get_statistics.return_value = {
+            mock_service.get_statistics.return_value = {
                 "student_id": 1,
                 "total_wrong_answers": 10,
                 "resolved_count": 3,
@@ -251,11 +244,9 @@ class TestGetPracticeRecommendations:
         给定学生有错题记录
         那么系统应生成针对性的练习推荐
         """
-        with patch('app.api.wrong_answers.PracticeRecommenderService') as mock_service:
-            mock_instance = Mock()
-            mock_service.return_value = mock_instance
+        with patch('app.api.wrong_answers.practice_service') as mock_service:
 
-            mock_instance.generate_recommendations.return_value = {
+            mock_service.generate_recommendations.return_value = {
                 "student_id": 1,
                 "recommendations": [
                     {
@@ -310,11 +301,9 @@ class TestGetPracticeRecommendations:
         给定学生没有错题记录
         那么系统应返回空推荐列表
         """
-        with patch('app.api.wrong_answers.PracticeRecommenderService') as mock_service:
-            mock_instance = Mock()
-            mock_service.return_value = mock_instance
+        with patch('app.api.wrong_answers.practice_service') as mock_service:
 
-            mock_instance.generate_recommendations.return_value = {
+            mock_service.generate_recommendations.return_value = {
                 "student_id": 1,
                 "recommendations": [],
                 "total_count": 0

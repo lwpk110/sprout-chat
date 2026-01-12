@@ -21,11 +21,8 @@ class TestGetKnowledgePoints:
         给定系统中有多个知识点
         那么系统应返回知识点列表，支持按科目和难度筛选
         """
-        with patch('app.api.knowledge.KnowledgeTrackerService') as mock_service:
-            mock_instance = Mock()
-            mock_service.return_value = mock_instance
-
-            mock_instance.get_knowledge_points.return_value = {
+        with patch('app.api.knowledge.tracker_service') as mock_service:
+            mock_service.get_knowledge_points.return_value = {
                 "total": 3,
                 "knowledge_points": [
                     {
@@ -70,11 +67,9 @@ class TestGetKnowledgePoints:
         给定请求包含科目和难度筛选
         那么系统应返回符合筛选条件的知识点
         """
-        with patch('app.api.knowledge.KnowledgeTrackerService') as mock_service:
-            mock_instance = Mock()
-            mock_service.return_value = mock_instance
+        with patch('app.api.knowledge.tracker_service') as mock_service:
 
-            mock_instance.get_knowledge_points.return_value = {
+            mock_service.get_knowledge_points.return_value = {
                 "total": 2,
                 "knowledge_points": [
                     {
@@ -110,11 +105,9 @@ class TestGetKnowledgePointDetail:
         给定知识点 ID
         那么系统应返回该知识点的详细信息
         """
-        with patch('app.api.knowledge.KnowledgeTrackerService') as mock_service:
-            mock_instance = Mock()
-            mock_service.return_value = mock_instance
+        with patch('app.api.knowledge.tracker_service') as mock_service:
 
-            mock_instance.get_knowledge_point_detail.return_value = {
+            mock_service.get_knowledge_point_detail.return_value = {
                 "id": 1,
                 "name": "加法基础",
                 "subject": "math",
@@ -142,11 +135,9 @@ class TestGetKnowledgePointDetail:
         给定知识点 ID 不存在
         那么系统应返回 404 错误
         """
-        with patch('app.api.knowledge.KnowledgeTrackerService') as mock_service:
-            mock_instance = Mock()
-            mock_service.return_value = mock_instance
+        with patch('app.api.knowledge.tracker_service') as mock_service:
 
-            mock_instance.get_knowledge_point_detail.return_value = None
+            mock_service.get_knowledge_point_detail.return_value = None
 
             response = client.get("/api/v1/knowledge-points/999")
 
@@ -164,15 +155,13 @@ class TestGetKnowledgeGraph:
         给定请求获取知识点图谱
         那么系统应返回 DAG 结构的图谱
         """
-        with patch('app.api.knowledge.KnowledgeTrackerService') as mock_service:
-            mock_instance = Mock()
-            mock_service.return_value = mock_instance
+        with patch('app.api.knowledge.tracker_service') as mock_service:
 
-            mock_instance.get_knowledge_graph.return_value = {
+            mock_service.get_knowledge_graph.return_value = {
                 "nodes": [
-                    {"id": 1, "name": "加法基础", "subject": "math"},
-                    {"id": 2, "name": "减法基础", "subject": "math"},
-                    {"id": 3, "name": "进位加法", "subject": "math"}
+                    {"id": 1, "name": "加法基础", "subject": "math", "difficulty_level": 1},
+                    {"id": 2, "name": "减法基础", "subject": "math", "difficulty_level": 1},
+                    {"id": 3, "name": "进位加法", "subject": "math", "difficulty_level": 2}
                 ],
                 "edges": [
                     {"from": 1, "to": 3, "type": "prerequisite"},
@@ -200,11 +189,9 @@ class TestGetKnowledgeMastery:
         给定学生 ID
         那么系统应返回该学生的知识点掌握情况
         """
-        with patch('app.api.knowledge.KnowledgeTrackerService') as mock_service:
-            mock_instance = Mock()
-            mock_service.return_value = mock_instance
+        with patch('app.api.knowledge.tracker_service') as mock_service:
 
-            mock_instance.get_student_mastery.return_value = {
+            mock_service.get_student_mastery.return_value = {
                 "student_id": 1,
                 "total_points": 10,
                 "mastered_count": 7,
@@ -248,11 +235,9 @@ class TestUpdateKnowledgeMastery:
         给定掌握度更新请求
         那么系统应更新掌握度并返回更新后的记录
         """
-        with patch('app.api.knowledge.KnowledgeTrackerService') as mock_service:
-            mock_instance = Mock()
-            mock_service.return_value = mock_instance
+        with patch('app.api.knowledge.tracker_service') as mock_service:
 
-            mock_instance.update_mastery.return_value = {
+            mock_service.update_mastery.return_value = {
                 "id": 1,
                 "student_id": 1,
                 "knowledge_point_id": 1,
@@ -282,11 +267,9 @@ class TestGetLearningPathRecommendations:
         给定学生 ID
         那么系统应基于前置知识点生成学习路径推荐
         """
-        with patch('app.api.knowledge.KnowledgeTrackerService') as mock_service:
-            mock_instance = Mock()
-            mock_service.return_value = mock_instance
+        with patch('app.api.knowledge.tracker_service') as mock_service:
 
-            mock_instance.generate_learning_path.return_value = {
+            mock_service.generate_learning_path.return_value = {
                 "student_id": 1,
                 "recommended_path": [
                     {
@@ -327,11 +310,9 @@ class TestGetLearningPathRecommendations:
         给定学生学习的是基础知识点（无前置）
         那么系统应推荐直接开始学习
         """
-        with patch('app.api.knowledge.KnowledgeTrackerService') as mock_service:
-            mock_instance = Mock()
-            mock_service.return_value = mock_instance
+        with patch('app.api.knowledge.tracker_service') as mock_service:
 
-            mock_instance.generate_learning_path.return_value = {
+            mock_service.generate_learning_path.return_value = {
                 "student_id": 1,
                 "recommended_path": [
                     {
