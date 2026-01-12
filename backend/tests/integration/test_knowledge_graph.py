@@ -97,8 +97,7 @@ class TestKnowledgeGraphStructure:
             subject="math",
             difficulty_level=1,
             description="10 以内的加法运算",
-            parent_id=None,
-            prerequisites=None
+            parent_id=None
         )
         db_session.add(kp1)
 
@@ -108,8 +107,7 @@ class TestKnowledgeGraphStructure:
             subject="math",
             difficulty_level=1,
             description="10 以内的减法运算",
-            parent_id=None,
-            prerequisites=None
+            parent_id=None
         )
         db_session.add(kp2)
 
@@ -139,8 +137,7 @@ class TestKnowledgeGraphStructure:
             name="加法基础",
             subject="math",
             difficulty_level=1,
-            description="10 以内的加法运算",
-            prerequisites=None
+            description="10 以内的加法运算"
         )
         db_session.add(kp1)
         db_session.commit()
@@ -186,8 +183,7 @@ class TestMasteryCalculation:
             name="加法基础",
             subject="math",
             difficulty_level=1,
-            description="10 以内的加法运算",
-            prerequisites=None
+            description="10 以内的加法运算"
         )
         db_session.add(kp)
         db_session.commit()
@@ -260,8 +256,7 @@ class TestPrerequisitesCheck:
             name="加法基础",
             subject="math",
             difficulty_level=1,
-            description="10 以内的加法运算",
-            prerequisites=None
+            description="10 以内的加法运算"
         )
         db_session.add(kp1)
         db_session.commit()
@@ -327,8 +322,7 @@ class TestLearningPathGeneration:
                 name=f"知识点_{level}",
                 subject="math",
                 difficulty_level=level,
-                description=f"难度 {level} 的知识点",
-                prerequisites=None
+                description=f"难度 {level} 的知识点"
             )
             db_session.add(kp)
 
@@ -365,8 +359,7 @@ class TestMasteryUpdate:
             name="加法基础",
             subject="math",
             difficulty_level=1,
-            description="10 以内的加法运算",
-            prerequisites=None
+            description="10 以内的加法运算"
         )
         db_session.add(kp)
         db_session.commit()

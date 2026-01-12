@@ -116,7 +116,7 @@ class TestWrongAnswersFlow:
             WrongAnswerRecord.learning_record_id == learning_record_id
         ).first()
         assert wrong_record is not None
-        assert wrong_record.student_id == test_student.id
+        assert wrong_record.learning_record.student_id == test_student.id
         assert wrong_record.error_type == "calculation"
         assert wrong_record.is_resolved is False
 
@@ -166,9 +166,9 @@ class TestWrongAnswersFlow:
         response = client.post("/api/v1/learning/records", json=request_data)
         assert response.status_code == 201
 
-        # 获取错题记录
-        wrong_record = db_session.query(WrongAnswerRecord).filter(
-            WrongAnswerRecord.student_id == test_student.id
+        # 获取错题记录（通过 learning_record 关系）
+        wrong_record = db_session.query(WrongAnswerRecord).join(LearningRecord).filter(
+            LearningRecord.student_id == test_student.id
         ).first()
         assert wrong_record is not None
 
