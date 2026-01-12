@@ -8,7 +8,7 @@
 
 from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import Optional, List
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 from sqlalchemy.orm import Session
 
 from app.services.learning_tracker import LearningTracker
@@ -74,8 +74,8 @@ async def create_learning_record(
         is_correct=is_correct,
         answer_result=answer_result,
         time_spent_seconds=request.time_spent_seconds,
-        created_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
     )
 
     db.add(record)
@@ -100,7 +100,7 @@ async def create_learning_record(
             guidance_type="hint",  # TODO: 根据错误类型和尝试次数选择引导类型
             guidance_content="让我来帮你检查一下。你一开始有 3 个苹果，妈妈又给了你 5 个，你能用手指或画图的方式数一数，一共有多少个苹果吗？",
             is_resolved=False,
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
         )
         db.add(wrong_record)
         db.commit()
@@ -216,13 +216,13 @@ async def get_learning_progress(
 
     # 应用时间范围筛选
     if time_range == "today":
-        today = datetime.utcnow().date()
+        today = datetime.now(timezone.utc).date()
         query = query.filter(LearningRecordModel.created_at >= today)
     elif time_range == "week":
-        week_ago = datetime.utcnow() - timedelta(days=7)
+        week_ago = datetime.now(timezone.utc) - timedelta(days=7)
         query = query.filter(LearningRecordModel.created_at >= week_ago)
     elif time_range == "month":
-        month_ago = datetime.utcnow() - timedelta(days=30)
+        month_ago = datetime.now(timezone.utc) - timedelta(days=30)
         query = query.filter(LearningRecordModel.created_at >= month_ago)
 
     # 统计数据

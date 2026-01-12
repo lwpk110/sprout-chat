@@ -6,6 +6,7 @@
 
 from typing import Dict, Any, List, Optional
 from sqlalchemy.orm import Session
+from datetime import datetime, timezone
 
 from app.models.database import WrongAnswerRecord, LearningRecord
 
@@ -156,7 +157,7 @@ class PracticeRecommenderService:
         wrong_answer.is_resolved = is_resolved
         if is_resolved:
             from datetime import datetime
-            wrong_answer.resolved_at = datetime.utcnow()
+            wrong_answer.resolved_at = datetime.now(timezone.utc)
 
         db.commit()
         db.refresh(wrong_answer)

@@ -6,7 +6,7 @@
 
 from typing import Dict, Any, List, Optional
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.models.database import (
     KnowledgePoint, KnowledgePointMastery, LearningRecord
@@ -284,7 +284,7 @@ class KnowledgeTrackerService:
             # 更新现有记录
             mastery.mastery_percentage = mastery_percentage
             mastery.status = status
-            mastery.updated_at = datetime.utcnow()
+            mastery.updated_at = datetime.now(timezone.utc)
         else:
             # 创建新记录
             mastery = KnowledgePointMastery(
@@ -292,7 +292,7 @@ class KnowledgeTrackerService:
                 knowledge_point_id=knowledge_point_id,
                 mastery_percentage=mastery_percentage,
                 status=status,
-                updated_at=datetime.utcnow()
+                updated_at=datetime.now(timezone.utc)
             )
             db.add(mastery)
 

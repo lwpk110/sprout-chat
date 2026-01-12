@@ -7,7 +7,7 @@
 """
 
 from typing import List, Dict, Optional, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 import uuid
 from sqlalchemy.orm import Session
@@ -358,8 +358,8 @@ class LearningTracker:
             is_correct=is_correct,
             answer_result=answer_result,
             time_spent_seconds=time_spent_seconds,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc),
         )
 
         db.add(record)
@@ -407,7 +407,7 @@ class LearningTracker:
             guidance_type=guidance_type,
             guidance_content=guidance_content,
             is_resolved=False,
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
         )
         db.add(wrong_record)
         db.commit()
@@ -436,13 +436,13 @@ class LearningTracker:
 
         # 应用时间范围筛选
         if time_range == "today":
-            today = datetime.utcnow().date()
+            today = datetime.now(timezone.utc).date()
             query = query.filter(LearningRecordModel.created_at >= today)
         elif time_range == "week":
-            week_ago = datetime.utcnow() - timedelta(days=7)
+            week_ago = datetime.now(timezone.utc) - timedelta(days=7)
             query = query.filter(LearningRecordModel.created_at >= week_ago)
         elif time_range == "month":
-            month_ago = datetime.utcnow() - timedelta(days=30)
+            month_ago = datetime.now(timezone.utc) - timedelta(days=30)
             query = query.filter(LearningRecordModel.created_at >= month_ago)
 
         # 统计数据
