@@ -682,3 +682,44 @@ tm set-status --id=LWP-X --status=done
 1. `9e181f6`: docs: 添加项目 README 文档
 2. `0b7bcf5`: [LWP-2.2-T026] feat: 编写引导教学集成测试 (Green)
 3. `2a7d5c6`: [LWP-2.2-T025] feat: 实现引导教学 API 端点 (Green)
+
+---
+
+## Agent Skills
+
+### 状态
+**已创建 6 个 Agent Skills**，用于规范开发流程和教学方法。
+
+### Skills 列表
+
+| Skill | 路径 | 用途 |
+|-------|------|------|
+| `tdd-cycle` | `.claude/skills/tdd-cycle/SKILL.md` | TDD 红-绿-重构循环 |
+| `git-commit` | `.claude/skills/git-commit/SKILL.md` | Git 提交规范 |
+| `sprout-persona` | `.claude/skills/sprout-persona/SKILL.md` | 小芽人格定义 |
+| `teaching-strategy` | `.claude/skills/teaching-strategy/SKILL.md` | 教学策略选择 |
+| `socratic-teaching` | `.claude/skills/socratic-teaching/SKILL.md` | 苏格拉底引导 |
+| `github-sync` | `.claude/skills/github-sync/SKILL.md` | GitHub-Taskmaster 同步 |
+
+### 使用方法
+
+在对话中提及 Skill 名称，Claude 会自动应用：
+- "使用 tdd 循环开发功能"
+- "按照 git-commit 规范提交"
+- "根据 sprout-persona 生成回复"
+
+### 目录结构
+```
+.claude/skills/
+├── tdd-cycle/SKILL.md
+├── git-commit/SKILL.md
+├── sprout-persona/SKILL.md
+├── teaching-strategy/SKILL.md
+├── socratic-teaching/SKILL.md
+├── github-sync/SKILL.md
+└── README.md
+```
+
+### 文档参考
+- [Agent Skills 官方文档](https://code.claude.com/docs/en/skills)
+- [Agent Skills 研究报告](../docs/agent-skills-research.md)
