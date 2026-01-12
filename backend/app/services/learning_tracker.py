@@ -2,12 +2,15 @@
 学习追踪服务
 
 实现学生的学习进度追踪、记录保存和报告生成功能
+- Phase 2.1: 内存存储（原有功能）
+- Phase 2.2: 数据库持久化（扩展功能）
 """
 
 from typing import List, Dict, Optional, Any
 from datetime import datetime, timedelta
 from collections import defaultdict
 import uuid
+from sqlalchemy.orm import Session
 
 from app.models.learning import (
     LearningRecord,
@@ -16,6 +19,13 @@ from app.models.learning import (
     ProgressSummary,
     AnswerResult,
     ProblemType
+)
+
+# Phase 2.2: 数据库模型导入
+from app.models.database import (
+    LearningRecord as LearningRecordModel,
+    WrongAnswerRecord as WrongAnswerRecordModel,
+    Student as StudentModel,
 )
 
 
@@ -298,6 +308,279 @@ class LearningTracker:
         return self._get_records_by_date_range(
             student_id, subject, start_date, end_date
         )
+
+    # =============================================================================
+    # Phase 2.2: 数据库持久化方法
+    # =============================================================================
+
+    def create_record_db(
+        self,
+        db: Session,
+        student_id: int,
+        question_content: str,
+        question_type: str,
+        subject: str,
+        difficulty_level: int,
+        student_answer: str,
+        correct_answer: str,
+        time_spent_seconds: int,
+    ) -> LearningRecordModel:
+        """
+        创建学习记录（数据库版本）
+
+        Args:
+            db: 数据库会话
+            student_id: 学生 ID
+            question_content: 问题内容
+            question_type: 问题类型
+            subject: 科目
+            difficulty_level: 难度等级
+            student_answer: 学生答案
+            correct_answer: 正确答案
+            time_spent_seconds: 答题耗时（秒）
+
+        Returns:
+            创建的学习记录
+        """
+        # 判断答案是否正确
+        is_correct = student_answer.strip() == correct_answer.strip()
+        answer_result = "correct" if is_correct else "incorrect"
+
+        # 创建学习记录
+        record = LearningRecordModel(
+            student_id=student_id,
+            question_content=question_content,
+            question_type=question_type,
+            subject=subject,
+            difficulty_level=difficulty_level,
+            student_answer=student_answer,
+            correct_answer=correct_answer,
+            is_correct=is_correct,
+            answer_result=answer_result,
+            time_spent_seconds=time_spent_seconds,
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow(),
+        )
+
+        db.add(record)
+        db.commit()
+        db.refresh(record)
+
+        # 如果答错，自动创建错题记录
+        if not is_correct:
+            self._create_wrong_answer_record(
+                db, record, question_content, student_answer, correct_answer
+            )
+
+        return record
+
+    def _create_wrong_answer_record(
+        self,
+        db: Session,
+        learning_record: LearningRecordModel,
+        question_content: str,
+        student_answer: str,
+        correct_answer: str,
+    ):
+        """
+        创建错题记录
+
+        Args:
+            db: 数据库会话
+            learning_record: 学习记录
+            question_content: 问题内容
+            student_answer: 学生答案
+            correct_answer: 正确答案
+        """
+        # TODO: 实现智能错误分类（US2 苏格拉底引导教学）
+        error_type = "calculation"  # 默认为计算错误
+
+        # TODO: 实现引导类型选择（US2 苏格拉底引导教学）
+        guidance_type = "hint"  # 默认为提示
+
+        # TODO: 使用 Claude API 生成引导式反馈（US2）
+        guidance_content = "让我来帮你检查一下。你一开始有 3 个苹果，妈妈又给了你 5 个，你能用手指或画图的方式数一数，一共有多少个苹果吗？"
+
+        wrong_record = WrongAnswerRecordModel(
+            learning_record_id=learning_record.id,
+            error_type=error_type,
+            guidance_type=guidance_type,
+            guidance_content=guidance_content,
+            is_resolved=False,
+            created_at=datetime.utcnow(),
+        )
+        db.add(wrong_record)
+        db.commit()
+
+    def get_progress_db(
+        self,
+        db: Session,
+        student_id: int,
+        time_range: str = "all"
+    ) -> Dict[str, Any]:
+        """
+        获取学习进度统计（数据库版本）
+
+        Args:
+            db: 数据库会话
+            student_id: 学生 ID
+            time_range: 时间范围 (today, week, month, all)
+
+        Returns:
+            学习进度统计
+        """
+        # 构建查询
+        query = db.query(LearningRecordModel).filter(
+            LearningRecordModel.student_id == student_id
+        )
+
+        # 应用时间范围筛选
+        if time_range == "today":
+            today = datetime.utcnow().date()
+            query = query.filter(LearningRecordModel.created_at >= today)
+        elif time_range == "week":
+            week_ago = datetime.utcnow() - timedelta(days=7)
+            query = query.filter(LearningRecordModel.created_at >= week_ago)
+        elif time_range == "month":
+            month_ago = datetime.utcnow() - timedelta(days=30)
+            query = query.filter(LearningRecordModel.created_at >= month_ago)
+
+        # 统计数据
+        records = query.all()
+        total_questions = len(records)
+        correct_count = sum(1 for r in records if r.is_correct)
+        wrong_count = total_questions - correct_count
+        accuracy_rate = (correct_count / total_questions * 100) if total_questions > 0 else 0.0
+
+        # 计算连续答对次数
+        current_streak = 0
+        for record in reversed(records):
+            if record.is_correct:
+                current_streak += 1
+            else:
+                break
+
+        # TODO: 计算最长连续答对记录
+        longest_streak = current_streak  # 简化实现
+
+        # 时间统计
+        total_time_spent = sum(r.time_spent_seconds for r in records)
+        avg_time = total_time_spent / total_questions if total_questions > 0 else 0.0
+
+        return {
+            "student_id": student_id,
+            "total_questions": total_questions,
+            "correct_count": correct_count,
+            "wrong_count": wrong_count,
+            "accuracy_rate": accuracy_rate,
+            "current_streak": current_streak,
+            "longest_streak": longest_streak,
+            "total_time_spent_seconds": total_time_spent,
+            "average_time_per_question_seconds": avg_time,
+            "time_range": time_range
+        }
+
+    def generate_report_db(
+        self,
+        db: Session,
+        student_id: int,
+        start_date: str,
+        end_date: str,
+    ) -> Dict[str, Any]:
+        """
+        生成学习进度报告（数据库版本）
+
+        Args:
+            db: 数据库会话
+            student_id: 学生 ID
+            start_date: 开始日期 (YYYY-MM-DD)
+            end_date: 结束日期 (YYYY-MM-DD)
+
+        Returns:
+            学习报告
+        """
+        # 解析日期
+        start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
+        end_datetime = datetime.strptime(end_date, "%Y-%m-%d")
+
+        # 构建查询
+        query = db.query(LearningRecordModel).filter(
+            LearningRecordModel.student_id == student_id,
+            LearningRecordModel.created_at >= start_datetime,
+            LearningRecordModel.created_at <= end_datetime
+        )
+
+        records = query.all()
+        total_questions = len(records)
+        correct_count = sum(1 for r in records if r.is_correct)
+        wrong_count = total_questions - correct_count
+
+        # 按题型统计
+        question_type_stats = {}
+        for record in records:
+            qtype = record.question_type
+            if qtype not in question_type_stats:
+                question_type_stats[qtype] = {"total": 0, "correct": 0}
+            question_type_stats[qtype]["total"] += 1
+            if record.is_correct:
+                question_type_stats[qtype]["correct"] += 1
+
+        by_question_type = [
+            {
+                "question_type": qtype,
+                "total_count": stats["total"],
+                "correct_count": stats["correct"],
+                "accuracy_rate": (stats["correct"] / stats["total"] * 100) if stats["total"] > 0 else 0.0
+            }
+            for qtype, stats in question_type_stats.items()
+        ]
+
+        # 按难度统计
+        difficulty_stats = {}
+        for record in records:
+            level = record.difficulty_level
+            if level not in difficulty_stats:
+                difficulty_stats[level] = {"total": 0, "correct": 0}
+            difficulty_stats[level]["total"] += 1
+            if record.is_correct:
+                difficulty_stats[level]["correct"] += 1
+
+        by_difficulty_level = [
+            {
+                "difficulty_level": level,
+                "total_count": stats["total"],
+                "correct_count": stats["correct"],
+                "accuracy_rate": (stats["correct"] / stats["total"] * 100) if stats["total"] > 0 else 0.0
+            }
+            for level, stats in sorted(difficulty_stats.items())
+        ]
+
+        # 连续答对记录
+        current_streak = 0
+        for record in reversed(records):
+            if record.is_correct:
+                current_streak += 1
+            else:
+                break
+
+        return {
+            "student_id": student_id,
+            "period_start": start_date,
+            "period_end": end_date,
+            "summary": {
+                "total_questions": total_questions,
+                "correct_count": correct_count,
+                "wrong_count": wrong_count,
+                "accuracy_rate": (correct_count / total_questions * 100) if total_questions > 0 else 0.0,
+                "total_time_seconds": sum(r.time_spent_seconds for r in records),
+            },
+            "by_question_type": by_question_type,
+            "by_difficulty_level": by_difficulty_level,
+            "streak_records": {
+                "current_streak": current_streak,
+                "longest_streak": current_streak,  # TODO: 实现真正的最长记录
+            }
+        }
 
     def clear_all_records(self):
         """清空所有记录（用于测试）"""
