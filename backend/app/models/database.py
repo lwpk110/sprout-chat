@@ -109,30 +109,42 @@ class ConversationMessage(Base):
 
 
 class LearningRecord(Base):
-    """学习记录表"""
+    """学习记录表（Phase 2.2 扩展）"""
     __tablename__ = "learning_records"
 
     id = Column(Integer, primary_key=True, index=True)
     record_id = Column(String(100), unique=True, index=True)
     session_id = Column(String(100), index=True)
-    student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=False, index=True)
 
     # 问题信息
-    subject = Column(String(50), nullable=False)
-    problem_type = Column(String(50), nullable=False)
-    problem_text = Column(Text, nullable=False)
+    question_content = Column(String(1000), nullable=False)  # 问题内容
+    question_type = Column(String(50), nullable=False)  # 题目类型（addition, subtraction等）
+    subject = Column(String(50), nullable=False, default="math")  # 科目
+    difficulty_level = Column(Integer, default=1)  # 难度等级（1-5）
+    problem_text = Column(Text)  # 保留兼容性
     problem_image_url = Column(String(500))
+    problem_type = Column(String(50))  # 保留兼容性
 
-    # 学生回答
-    student_answer = Column(Text, nullable=False)
-    answer_result = Column(String(20), nullable=False)  # correct, incorrect, partial
+    # 答案信息（Phase 2.2 新增）
+    correct_answer = Column(String(500), nullable=False)  # 正确答案
+    is_correct = Column(Boolean, nullable=False, index=True)  # 是否正确
+
+    # 学生回答（加密存储）
+    student_answer = Column(Text, nullable=False)  # TODO: 应用加密
+    answer_result = Column(String(20), nullable=False)  # 保留兼容性（correct, incorrect, partial）
     attempts = Column(Integer, default=1)
     hints_used = Column(Integer, default=0)
 
-    # 时间信息
+    # 时间信息（Phase 2.2 优化）
     question_time = Column(DateTime, default=datetime.utcnow)
     answer_time = Column(DateTime)
-    response_duration = Column(Float)  # 秒
+    response_duration = Column(Float)  # 保留兼容性（秒）
+    time_spent_seconds = Column(Integer, nullable=False)  # 答题耗时（秒）Phase 2.2
+
+    # 时间戳
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # 教学信息
     strategy_used = Column(String(100))
@@ -141,11 +153,15 @@ class LearningRecord(Base):
     # 元数据
     json_metadata = Column(JSON)
 
-    # 时间戳
-    created_at = Column(DateTime, default=datetime.utcnow)
-
     # 关系
     student = relationship("Student", back_populates="learning_records")
+    wrong_answer_record = relationship("WrongAnswerRecord", back_populates="learning_record", uselist=False)
+
+    # 复合索引
+    __table_args__ = (
+        # TODO: Add composite index for (student_id, created_at) in Alembic migration
+        # Index('idx_student_created', 'student_id', 'created_at'),
+    )
 
 
 class StudentProgress(Base):
@@ -260,6 +276,99 @@ class Problem(Base):
     # 时间戳
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# =============================================================================
+# Phase 2.2: Learning Management Models
+# =============================================================================
+
+class WrongAnswerRecord(Base):
+    """错题记录表（Phase 2.2）"""
+    __tablename__ = "wrong_answer_records"
+
+    id = Column(Integer, primary_key=True, index=True)
+    learning_record_id = Column(Integer, ForeignKey("learning_records.id"), unique=True, nullable=False, index=True)
+
+    # 错误分类
+    error_type = Column(String(50), nullable=False, index=True)  # calculation, concept, understanding, careless
+
+    # 引导式反馈
+    guidance_type = Column(String(50), nullable=False)  # clarify, hint, break_down, visualize, check_work, alternative_method, encourage
+    guidance_content = Column(Text, nullable=False)  # 引导式反馈内容
+
+    # 解决状态
+    is_resolved = Column(Boolean, default=False, nullable=False, index=True)
+    resolved_at = Column(DateTime)
+
+    # 时间戳
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # 关系
+    learning_record = relationship("LearningRecord", back_populates="wrong_answer_record")
+
+
+class KnowledgePoint(Base):
+    """知识点表（Phase 2.2）"""
+    __tablename__ = "knowledge_points"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), unique=True, nullable=False, index=True)
+    description = Column(Text)
+
+    # 分类
+    subject = Column(String(50), nullable=False, index=True)  # math, chinese, english
+    difficulty_level = Column(Integer, nullable=False)  # 1-5
+
+    # 时间戳
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # 关系（自引用多对多：前置知识点）
+    prerequisites = relationship(
+        "KnowledgePoint",
+        secondary="knowledge_point_dependencies",
+        primaryjoin="KnowledgePoint.id == KnowledgePointDependency.knowledge_point_id",
+        secondaryjoin="KnowledgePoint.id == KnowledgePointDependency.prerequisite_id",
+        backref="dependents"
+    )
+
+
+class KnowledgeMastery(Base):
+    """知识点掌握表（Phase 2.2）"""
+    __tablename__ = "knowledge_mastery"
+
+    id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=False, index=True)
+    knowledge_point_id = Column(Integer, ForeignKey("knowledge_points.id"), nullable=False, index=True)
+
+    # 掌握度
+    mastery_percentage = Column(Integer, nullable=False)  # 0-100
+    questions_practiced = Column(Integer, default=0, nullable=False)
+    questions_correct = Column(Integer, default=0, nullable=False)
+    recent_performance = Column(Integer)  # 最近表现（最近10题的正确率，0-100）
+
+    # 掌握状态
+    mastery_status = Column(String(50), default="not_started", nullable=False, index=True)  # not_started, learning, mastered
+
+    # 时间信息
+    last_practiced_at = Column(DateTime, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # 复合索引
+    __table_args__ = (
+        # TODO: Add unique constraint for (student_id, knowledge_point_id) in Alembic migration
+        # UniqueConstraint('student_id', 'knowledge_point_id', name='uq_student_knowledge'),
+    )
+
+
+class KnowledgePointDependency(Base):
+    """知识点依赖关系表（Phase 2.2）"""
+    __tablename__ = "knowledge_point_dependencies"
+
+    knowledge_point_id = Column(Integer, ForeignKey("knowledge_points.id"), primary_key=True)
+    prerequisite_id = Column(Integer, ForeignKey("knowledge_points.id"), primary_key=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 
 # 数据库会话管理
