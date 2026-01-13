@@ -16,7 +16,7 @@ export default function GuidedResponse({ response, timestamp }: GuidedResponsePr
       const utterance = new SpeechSynthesisUtterance(response)
       utterance.lang = 'zh-CN'
       utterance.rate = 0.9  // 稍慢的语速适合学生
-      utterance.pitch = 1.2  # 稍高的音调更友好
+      utterance.pitch = 1.2  // 稍高的音调更友好
 
       utterance.onstart = () => setIsSpeaking(true)
       utterance.onend = () => setIsSpeaking(false)
