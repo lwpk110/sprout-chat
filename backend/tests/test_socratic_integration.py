@@ -384,14 +384,25 @@ class TestSocraticIntegration:
         assert response.is_socratic is True
 
     @pytest.mark.asyncio
-    async def test_socratic_fallback_on_error(
+    async def test_socratic_fallback_on_api_error(
         self,
-        socratic_service
+        socratic_service,
+        monkeypatch
     ):
         """测试 API 失败时的 fallback 响应"""
-        # Act - 空输入会触发 ValueError，但服务会返回 fallback
+        # Arrange - 模拟 API 调用失败
+        async def mock_call_ai_api(*args, **kwargs):
+            raise Exception("API 调用失败")
+
+        monkeypatch.setattr(
+            socratic_service,
+            "_call_ai_api",
+            mock_call_ai_api
+        )
+
+        # Act - API 失败应该返回 fallback
         response = await socratic_service.generate_response(
-            student_message="",  # 空输入
+            student_message="1 + 1 = ?",
             problem_context=None,
             scaffolding_level="moderate"
         )
@@ -399,6 +410,7 @@ class TestSocraticIntegration:
         # Assert - 应该返回 fallback 响应
         assert response is not None
         assert response.response != ""
+        assert response.metadata.get("fallback") is True
 
     def test_response_format_for_frontend(self):
         """测试响应格式是否符合前端预期"""

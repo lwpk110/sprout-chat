@@ -2,10 +2,11 @@
 对话 API 路由
 
 处理语音/文字输入、会话管理、对话历史
+集成苏格拉底响应服务 (LWP-14)
 """
 
 from fastapi import APIRouter, HTTPException, status
-from typing import List
+from typing import List, Optional
 
 from app.models.schemas import (
     CreateSessionRequest,
@@ -18,8 +19,16 @@ from app.models.schemas import (
     ErrorResponse
 )
 from app.services.engine import engine
+from app.services.socratic_response import SocraticResponseService
+from app.services.context_extractor import InteractionContextExtractor
+from app.services.scaffolding_manager import ScaffoldingLevelManager
 
 router = APIRouter(prefix="/api/v1/conversations", tags=["conversations"])
+
+# 初始化苏格拉底相关服务
+socratic_service = SocraticResponseService()
+context_extractor = InteractionContextExtractor(engine)
+scaffolding_manager = ScaffoldingLevelManager()
 
 
 @router.post(
@@ -240,3 +249,228 @@ async def delete_session(session_id: str) -> dict:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"删除会话时出错: {str(e)}"
         )
+
+
+# ============================================================
+# 苏格拉底响应端点 (LWP-14)
+# ============================================================
+
+@router.post(
+    "/{conversation_id}/voice-socratic",
+    response_model=ConversationResponse,
+    summary="语音输入处理（苏格拉底引导式）"
+)
+async def voice_input_socratic(
+    conversation_id: str,
+    transcript: str,
+    confidence: Optional[float] = None,
+    scaffolding_level: Optional[str] = None
+) -> ConversationResponse:
+    """
+    处理语音识别后的文本输入，返回苏格拉底引导式响应
+
+    ## 流程
+    1. 提取交互上下文（对话历史、学生信息）
+    2. 确定脚手架层级（基于学生表现）
+    3. 调用苏格拉底响应服务生成引导式响应
+    4. 保存对话记录
+
+    ## 参数
+    - **conversation_id**: 会话 ID
+    - **transcript**: 语音识别的文本
+    - **confidence**: 识别置信度（可选）
+    - **scaffolding_level**: 脚手架层级（可选，默认自动调整）
+      - `highly_guided`: 高度引导
+      - `moderate`: 中度引导
+      - `minimal`: 最小引导
+
+    ## 响应示例
+    ```json
+    {
+        "session_id": "student_001_20250113...",
+        "response": "🌱 你觉得如果有 1 个苹果，妈妈又给了你 1 个，现在有几个呢？",
+        "timestamp": "2025-01-13T10:00:00Z",
+        "response_type": "socratic",
+        "is_socratic": true,
+        "scaffolding_level": "moderate",
+        "validation_score": 0.95
+    }
+    ```
+    """
+    try:
+        # 1. 提取交互上下文
+        context = context_extractor.extract_context(
+            conversation_id=conversation_id,
+            student_input=transcript,
+            input_type="voice"
+        )
+
+        # 2. 确定脚手架层级
+        if scaffolding_level:
+            # 用户指定层级
+            level = scaffolding_level
+        else:
+            # 根据表现自动调整
+            performance_history = _get_performance_history(conversation_id)
+            level_obj = scaffolding_manager.determine_level(
+                conversation_id=conversation_id,
+                performance_history=performance_history
+            )
+            level = level_obj.value
+
+        # 3. 生成苏格拉底响应
+        socratic_response = await socratic_service.generate_response(
+            student_message=transcript,
+            problem_context=None,  # 可以后续集成 OCR
+            scaffolding_level=level,
+            conversation_history=context_extractor.convert_to_ai_history_format(
+                context["conversation_history"]
+            ),
+            conversation_id=conversation_id,
+            student_level=f"一年级（{context['student_age']}岁）"
+        )
+
+        # 4. 保存对话记录到引擎
+        engine.add_message(conversation_id, "user", transcript)
+        engine.add_message(conversation_id, "assistant", socratic_response.response)
+
+        session = engine.get_session(conversation_id)
+
+        # 5. 返回响应（扩展格式）
+        return ConversationResponse(
+            session_id=conversation_id,
+            response=socratic_response.response,
+            timestamp=session["last_activity"].isoformat() if session else ""
+        )
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"处理语音输入时出错: {str(e)}"
+        )
+
+
+@router.post(
+    "/{conversation_id}/message-socratic",
+    response_model=ConversationResponse,
+    summary="文字输入处理（苏格拉底引导式）"
+)
+async def text_input_socratic(
+    conversation_id: str,
+    content: str,
+    scaffolding_level: Optional[str] = None
+) -> ConversationResponse:
+    """
+    处理文字输入，返回苏格拉底引导式响应
+
+    ## 流程
+    1. 提取交互上下文
+    2. 确定脚手架层级
+    3. 调用苏格拉底响应服务
+    4. 保存对话记录
+
+    ## 参数
+    - **conversation_id**: 会话 ID
+    - **content**: 文字内容
+    - **scaffolding_level**: 脚手架层级（可选）
+
+    ## 响应示例
+    ```json
+    {
+        "session_id": "student_001_20250113...",
+        "response": "🌱 你觉得这道题应该先算哪一步？为什么？",
+        "timestamp": "2025-01-13T10:00:00Z"
+    }
+    ```
+    """
+    try:
+        # 1. 提取交互上下文
+        context = context_extractor.extract_context(
+            conversation_id=conversation_id,
+            student_input=content,
+            input_type="text"
+        )
+
+        # 2. 确定脚手架层级
+        if scaffolding_level:
+            level = scaffolding_level
+        else:
+            performance_history = _get_performance_history(conversation_id)
+            level_obj = scaffolding_manager.determine_level(
+                conversation_id=conversation_id,
+                performance_history=performance_history
+            )
+            level = level_obj.value
+
+        # 3. 生成苏格拉底响应
+        socratic_response = await socratic_service.generate_response(
+            student_message=content,
+            problem_context=None,
+            scaffolding_level=level,
+            conversation_history=context_extractor.convert_to_ai_history_format(
+                context["conversation_history"]
+            ),
+            conversation_id=conversation_id,
+            student_level=f"一年级（{context['student_age']}岁）"
+        )
+
+        # 4. 保存对话记录
+        engine.add_message(conversation_id, "user", content)
+        engine.add_message(conversation_id, "assistant", socratic_response.response)
+
+        session = engine.get_session(conversation_id)
+
+        return ConversationResponse(
+            session_id=conversation_id,
+            response=socratic_response.response,
+            timestamp=session["last_activity"].isoformat() if session else ""
+        )
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"处理文字输入时出错: {str(e)}"
+        )
+
+
+# ============================================================
+# 辅助函数
+# ============================================================
+
+def _get_performance_history(conversation_id: str) -> Optional[List[dict]]:
+    """
+    获取学生表现历史（用于确定脚手架层级）
+
+    Args:
+        conversation_id: 会话 ID
+
+    Returns:
+        表现历史列表或 None
+    """
+    # 从对话历史中推断表现（简单版本）
+    # TODO: 未来可以从数据库查询真实的学习记录
+    history = engine.get_conversation_history(conversation_id, limit=10)
+
+    # 简单的启发式规则：
+    # - 如果学生连续回答"对"、"是的"、"正确"等，算作正确
+    # - 如果学生说"不知道"、"不会"等，算作错误
+    performance = []
+    for msg in history:
+        if msg["role"] == "user":
+            content = msg["content"].lower()
+            if any(word in content for word in ["对", "是的", "正确", "好的"]):
+                performance.append({"is_correct": True})
+            elif any(word in content for word in ["不知道", "不会", "不懂"]):
+                performance.append({"is_correct": False})
+
+    return performance if performance else None
