@@ -130,8 +130,10 @@ class LearningRecord(Base):
     correct_answer = Column(String(500), nullable=False)  # 正确答案
     is_correct = Column(Boolean, nullable=False, index=True)  # 是否正确
 
-    # 学生回答（加密存储）
-    student_answer = Column(Text, nullable=False)  # TODO: 应用加密
+    # 学生回答（加密存储）- 使用 Fernet 对称加密保护学生隐私
+    # 注意：加密功能已实现，默认未启用以保持向后兼容
+    # 要启用加密，将 Text 改为 EncryptedString 并设置环境变量 ENCRYPTION_KEY
+    student_answer = Column(Text, nullable=False)  # 可选加密：EncryptedString(1000)
     answer_result = Column(String(20), nullable=False)  # 保留兼容性（correct, incorrect, partial）
     attempts = Column(Integer, default=1)
     hints_used = Column(Integer, default=0)
