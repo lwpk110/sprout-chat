@@ -460,8 +460,15 @@ class LearningTracker:
             else:
                 break
 
-        # TODO: 计算最长连续答对记录
-        longest_streak = current_streak  # 简化实现
+        # 计算最长连续答对记录
+        longest_streak = 0
+        temp_streak = 0
+        for record in records:
+            if record.is_correct:
+                temp_streak += 1
+                longest_streak = max(longest_streak, temp_streak)
+            else:
+                temp_streak = 0
 
         # 时间统计
         total_time_spent = sum(r.time_spent_seconds for r in records)

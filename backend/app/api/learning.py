@@ -385,6 +385,16 @@ async def generate_learning_report(
         else:
             break
 
+    # 计算最长连续答对记录
+    longest_streak = 0
+    temp_streak = 0
+    for record in records:
+        if record.is_correct:
+            temp_streak += 1
+            longest_streak = max(longest_streak, temp_streak)
+        else:
+            temp_streak = 0
+
     return {
         "student_id": student_id,
         "period_start": start_date,
@@ -400,7 +410,7 @@ async def generate_learning_report(
         "by_difficulty_level": by_difficulty_level,
         "streak_records": {
             "current_streak": current_streak,
-            "longest_streak": current_streak,  # TODO: 实现真正的最长记录
+            "longest_streak": longest_streak,
         }
     }
 
