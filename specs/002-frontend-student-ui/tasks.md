@@ -90,8 +90,8 @@
 
 ### 3.3 语音播报功能 (TTS)
 
-- [ ] T021 [US1] 实现 useSpeechSynthesis Hook (TTS 语音播报) 在 frontend/src/hooks/useSpeechSynthesis.ts
-- [ ] T022 [US1] 集成 TTS 到 GuidedResponse 组件 在 frontend/src/components/GuidedResponse.tsx
+- [X] T021 [US1] 实现 useSpeechSynthesis Hook (TTS 语音播报) 在 frontend/src/hooks/useSpeechSynthesis.ts
+- [X] T022 [US1] 集成 TTS 到 GuidedResponse 组件 在 frontend/src/components/GuidedResponse.tsx
 
 ### 3.4 TextInteraction 组件增强
 
