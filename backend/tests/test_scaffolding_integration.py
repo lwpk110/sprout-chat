@@ -64,7 +64,7 @@ class TestScaffoldingIntegration:
     def test_end_to_end_scaffolding_adjustment(self, client, db_session):
         """测试：端到端的脚手架层级调整流程"""
         # Given: 学生 ID 和问题领域
-        student_id = 999
+        student_id = 100  # 使用独特的 ID 避免冲突
         problem_domain = "math"
 
         # 创建持久化服务
@@ -115,7 +115,7 @@ class TestScaffoldingIntegration:
     def test_cross_session_persistence(self, client, db_session):
         """测试：跨会话的脚手架层级持久化"""
         # Given: 学生 ID
-        student_id = 999
+        student_id = 101  # 使用独特的 ID 避免冲突
         problem_domain = "math"
 
         # 创建持久化服务
@@ -157,7 +157,7 @@ class TestScaffoldingIntegration:
     def test_performance_stats_aggregation(self, client, db_session):
         """测试：表现统计聚合功能"""
         # Given: 学生 ID
-        student_id = 999
+        student_id = 102  # 使用独特的 ID 避免冲突
         problem_domain = "math"
 
         # 创建持久化服务
