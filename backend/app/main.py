@@ -23,6 +23,7 @@ from app.api.scaffolding import router as scaffolding_router
 from app.api.validation import router as validation_router
 from app.api.parent_reports import router as parent_reports_router
 from app.api.parental_settings import router as parental_settings_router
+from app.api.multi_subject import router as multi_subject_router
 from app.services.engine import engine
 
 
@@ -146,6 +147,7 @@ app.include_router(scaffolding_router)
 app.include_router(validation_router)
 app.include_router(parent_reports_router)
 app.include_router(parental_settings_router)
+app.include_router(multi_subject_router)
 
 
 @app.get("/", tags=["root"])
