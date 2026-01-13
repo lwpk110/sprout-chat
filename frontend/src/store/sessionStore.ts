@@ -7,7 +7,6 @@ import { create } from 'zustand';
 import type {
   SessionResponse,
   MessageResponse,
-  ConversationResponse,
 } from '../types';
 
 interface SessionState {

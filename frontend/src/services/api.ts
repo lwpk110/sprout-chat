@@ -16,7 +16,7 @@ import type {
 } from '../types';
 
 // API 基础 URL（开发环境使用代理）
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL || '/api';
 
 class ApiClient {
   private client: AxiosInstance;
@@ -113,6 +113,41 @@ class ApiClient {
   async deleteSession(sessionId: string): Promise<{ message: string }> {
     const response = await this.client.delete<{ message: string }>(
       `/v1/conversations/${sessionId}`
+    );
+    return response.data;
+  }
+
+  /**
+   * 上传图片并获得引导式教学响应
+   */
+  async uploadImageForGuidance(
+    file: File,
+    studentId: string,
+    studentAge: number = 6,
+    subject: string = '数学'
+  ): Promise<{
+    success: boolean;
+    data: {
+      student_id: string;
+      subject: string;
+      response: string;
+      image_size: number;
+    };
+  }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('student_id', studentId);
+    formData.append('student_age', studentAge.toString());
+    formData.append('subject', subject);
+
+    const response = await this.client.post(
+      '/v1/images/guide',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
     );
     return response.data;
   }

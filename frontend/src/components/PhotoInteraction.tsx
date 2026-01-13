@@ -52,35 +52,38 @@ export default function PhotoInteraction({
     try {
       const file = fileInputRef.current.files[0]
 
-      // 创建 FormData
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('session_id', sessionId)
-
-      // 发送到后端（假设有 /api/v1/ocr/upload 端点）
-      // 注意：这个端点可能还未实现，这里先模拟
+      // 添加用户消息
       addMessage('user', '[上传了一张图片]')
 
-      // 模拟 API 调用
-      // TODO: 实际对接 OCR API
-      // const response = await apiClient.uploadImage(sessionId, file)
+      // 调用真实的后端 API
+      const response = await apiClient.uploadImageForGuidance(
+        file,
+        sessionId,
+        6, // student_age
+        '数学' // subject
+      )
 
-      // 模拟响应
-      setTimeout(() => {
-        addMessage('assistant', '我看到你的作业了！让我们一起来看看这道题目...')
-        onImageUploaded('图片已上传')
-        setPreview(null)
-        setIsUploading(false)
+      // 添加 AI 响应
+      if (response.success && response.data.response) {
+        addMessage('assistant', response.data.response)
+        onImageUploaded('图片已识别')
+      } else {
+        throw new Error('未能获取 AI 响应')
+      }
 
-        // 重置文件输入
-        if (fileInputRef.current) {
-          fileInputRef.current.value = ''
-        }
-      }, 1500)
+      // 清理预览
+      setPreview(null)
+
+      // 重置文件输入
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
 
     } catch (err) {
       console.error('上传图片失败:', err)
       setError('上传图片失败，请重试')
+      addMessage('assistant', '哎呀，小芽没看清这张图片，能再拍一次吗？📷')
+    } finally {
       setIsUploading(false)
     }
   }

@@ -3,7 +3,7 @@
  * 适合一年级学生的简洁友好界面
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useSessionStore } from '../store/sessionStore'
 import { apiClient } from '../services/api'
 import VoiceInteraction from '../components/VoiceInteraction'
@@ -11,7 +11,7 @@ import PhotoInteraction from '../components/PhotoInteraction'
 import GuidedResponse from '../components/GuidedResponse'
 
 export default function StudentHome() {
-  const { sessionId, setSession, messages, isValid, isLoading, error, setLoading, setError } = useSessionStore()
+  const { sessionId, setSession, messages, isLoading, error, setLoading, setError } = useSessionStore()
 
   useEffect(() => {
     // 组件挂载时创建会话
