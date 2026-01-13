@@ -36,14 +36,14 @@ async def upload_image(
     Returns:
         识别结果
     """
-    try:
-        # 验证文件类型
-        if not file.content_type.startswith("image/"):
-            raise HTTPException(
-                status_code=400,
-                detail="只支持图片文件 (jpg, png, etc.)"
-            )
+    # 验证文件类型（移到 try 块外，避免被外层捕获）
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=400,
+            detail="只支持图片文件 (jpg, png, etc.)"
+        )
 
+    try:
         # 读取图片内容
         image_bytes = await file.read()
 
@@ -65,6 +65,9 @@ async def upload_image(
             }
         })
 
+    except HTTPException:
+        # HTTPException 直接向上传播
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -87,14 +90,14 @@ async def recognize_image(
     Returns:
         识别的文本内容
     """
-    try:
-        # 验证文件类型
-        if not file.content_type.startswith("image/"):
-            raise HTTPException(
-                status_code=400,
-                detail="只支持图片文件"
-            )
+    # 验证文件类型（移到 try 块外）
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=400,
+            detail="只支持图片文件"
+        )
 
+    try:
         # 读取并编码图片
         image_bytes = await file.read()
         base64_image = b64encode(image_bytes).decode('utf-8')
@@ -107,6 +110,9 @@ async def recognize_image(
             "result": result
         })
 
+    except HTTPException:
+        # HTTPException 直接向上传播
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -135,14 +141,14 @@ async def guide_from_image(
     Returns:
         引导式教学响应
     """
-    try:
-        # 验证文件类型
-        if not file.content_type.startswith("image/"):
-            raise HTTPException(
-                status_code=400,
-                detail="只支持图片文件"
-            )
+    # 验证文件类型（移到 try 块外）
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=400,
+            detail="只支持图片文件"
+        )
 
+    try:
         # 读取并编码图片
         image_bytes = await file.read()
         base64_image = b64encode(image_bytes).decode('utf-8')
@@ -174,6 +180,9 @@ async def guide_from_image(
             }
         })
 
+    except HTTPException:
+        # HTTPException 直接向上传播
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -192,14 +201,14 @@ async def extract_math_problem(file: UploadFile = File(...)):
     Returns:
         提取的数学问题
     """
-    try:
-        # 验证文件类型
-        if not file.content_type.startswith("image/"):
-            raise HTTPException(
-                status_code=400,
-                detail="只支持图片文件"
-            )
+    # 验证文件类型（移到 try 块外）
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=400,
+            detail="只支持图片文件"
+        )
 
+    try:
         # 读取并编码图片
         image_bytes = await file.read()
         base64_image = b64encode(image_bytes).decode('utf-8')
@@ -215,6 +224,9 @@ async def extract_math_problem(file: UploadFile = File(...)):
             "problem": problem.strip()
         })
 
+    except HTTPException:
+        # HTTPException 直接向上传播
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,

@@ -1,7 +1,7 @@
 """
-GLM-4.6v 视觉服务 - 图像识别
+GLM-4v-Flash 视觉服务 - 图像识别
 
-使用智谱 GLM-4.6v 视觉模型识别数学题目和作业内容
+使用智谱 GLM-4v-Flash 视觉模型识别数学题目和作业内容（免费版本）
 """
 
 from openai import OpenAI
@@ -16,9 +16,9 @@ from app.services.sprout_persona import SPROUT_SYSTEM_PROMPT
 
 class VisionService:
     """
-    GLM-4.6v 视觉服务
+    GLM-4v-Flash 视觉服务
 
-    负责图像识别和题目理解
+    负责图像识别和题目理解（使用免费版本）
     """
 
     def __init__(self):
@@ -138,7 +138,7 @@ class VisionService:
         # 1. 识别图片内容
         problem = await self.extract_math_problem(image_description)
 
-        # 2. 构建给 GLM-4.6v 的 Prompt
+        # 2. 构建给 GLM-4v-Flash 的 Prompt
         prompt = f"""{SPROUT_SYSTEM_PROMPT}
 
 学生拍了这道题目的照片：
@@ -151,7 +151,7 @@ class VisionService:
 - 语气温柔鼓励
 """
 
-        # 3. 调用 GLM-4.6v 生成响应
+        # 3. 调用 GLM-4v-Flash 生成响应
         try:
             response = self.client.chat.completions.create(
                 model=self.vision_model,
@@ -174,7 +174,7 @@ class VisionService:
         prompt: str = "请描述这张图片中的数学题目"
     ) -> str:
         """
-        调用 GLM-4.6v Vision API
+        调用 GLM-4v-Flash Vision API（免费版本）
 
         Args:
             image_data: base64 编码的图片数据
