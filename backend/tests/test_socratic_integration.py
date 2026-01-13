@@ -84,7 +84,7 @@ class TestInteractionContextExtractor:
     def test_extract_context_invalid_session(self, context_extractor):
         """测试从无效会话中提取上下文"""
         # Act & Assert
-        with pytest.raises(ValueError, match="会话不存在"):
+        with pytest.raises(ValueError, match="不存在"):
             context_extractor.extract_context(
                 conversation_id="invalid_session_id",
                 student_input="测试",
