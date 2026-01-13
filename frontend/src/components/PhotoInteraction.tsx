@@ -117,6 +117,7 @@ export default function PhotoInteraction({
         accept="image/*"
         onChange={handleFileSelect}
         className="hidden"
+        data-testid="file-input"
       />
 
       {/* 图片预览区域 */}
