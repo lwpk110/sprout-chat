@@ -10,6 +10,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  define: {
+    __API_BASE_URL__: JSON.stringify(process.env.VITE_API_BASE_URL || '/api'),
+  },
   server: {
     port: 3000,
     proxy: {

@@ -16,14 +16,23 @@ import type {
 } from '../types';
 
 // API 基础 URL（开发环境使用代理）
-const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL || '/api';
+// 支持测试环境注入
+declare const __API_BASE_URL__: string | undefined;
+const getApiBaseUrl = (): string => {
+  // 测试环境：检查全局配置
+  if (typeof __API_BASE_URL__ !== 'undefined') {
+    return __API_BASE_URL__;
+  }
+  // 默认值
+  return '/api';
+};
 
 class ApiClient {
   private client: AxiosInstance;
 
-  constructor() {
+  constructor(baseURL?: string) {
     this.client = axios.create({
-      baseURL: API_BASE_URL,
+      baseURL: baseURL || getApiBaseUrl(),
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json',

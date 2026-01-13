@@ -9,19 +9,19 @@ import PhotoInteraction from '../PhotoInteraction'
 import { useSessionStore } from '../../store/sessionStore'
 
 // Mock the session store
-vi.mock('../../store/sessionStore')
+jest.mock('../../store/sessionStore')
 
 // Mock the API client
-vi.mock('../../services/api', () => ({
+jest.mock('../../services/api', () => ({
   apiClient: {
-    uploadImageForGuidance: vi.fn(),
+    uploadImageForGuidance: jest.fn(),
   },
 }))
 
 describe('PhotoInteraction Component', () => {
-  const mockAddMessage = vi.fn()
-  const mockSetError = vi.fn()
-  const mockOnImageUploaded = vi.fn()
+  const mockAddMessage = jest.fn()
+  const mockSetError = jest.fn()
+  const mockOnImageUploaded = jest.fn()
 
   const defaultProps = {
     sessionId: 'test-session-123',
@@ -30,7 +30,7 @@ describe('PhotoInteraction Component', () => {
   }
 
   beforeEach(() => {
-    vi.clearAllMocks()
+    jest.clearAllMocks()
     ;(useSessionStore as any).mockReturnValue({
       addMessage: mockAddMessage,
       setError: mockSetError,
@@ -38,7 +38,7 @@ describe('PhotoInteraction Component', () => {
   })
 
   afterEach(() => {
-    vi.restoreAllMocks()
+    jest.restoreAllMocks()
   })
 
   describe('组件渲染', () => {
@@ -64,7 +64,9 @@ describe('PhotoInteraction Component', () => {
     it('应该拒绝非图片文件', async () => {
       render(<PhotoInteraction {...defaultProps} />)
 
-      const fileInput = screen.getByRole('button').parentNode?.querySelector('input[type="file"]') as HTMLInputElement
+      const fileInput = screen.getByRole('button').parentElement?.querySelector('input[type="file"]') as HTMLInputElement
+      expect(fileInput).toBeInTheDocument()
+
       const file = new File(['content'], 'test.txt', { type: 'text/plain' })
 
       Object.defineProperty(fileInput, 'files', {
