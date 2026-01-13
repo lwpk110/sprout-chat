@@ -51,7 +51,7 @@ class TestScaffoldingAPI:
     def test_get_scaffolding_level_new_student(self, client):
         """测试：获取新学生的脚手架层级"""
         # Given: 新学生 ID
-        student_id = 999
+        student_id = 201
 
         # When: 获取脚手架层级
         response = client.get(f"/api/v1/scaffolding/students/{student_id}/level")
@@ -66,7 +66,7 @@ class TestScaffoldingAPI:
     def test_get_scaffolding_level_with_domain(self, client):
         """测试：获取特定领域的脚手架层级"""
         # Given: 学生 ID 和问题领域
-        student_id = 999
+        student_id = 202  # 使用独特的 ID
         problem_domain = "math"
 
         # When: 获取脚手架层级
@@ -84,7 +84,7 @@ class TestScaffoldingAPI:
     def test_set_scaffolding_level(self, client):
         """测试：设置脚手架层级"""
         # Given: 学生 ID
-        student_id = 999
+        student_id = 203  # 使用独特的 ID
 
         # When: 设置新的脚手架层级
         response = client.post(
@@ -111,7 +111,7 @@ class TestScaffoldingAPI:
     def test_get_performance_metrics_empty(self, client):
         """测试：获取空的表现指标"""
         # Given: 学生 ID
-        student_id = 999
+        student_id = 204  # 使用独特的 ID
 
         # When: 获取表现指标
         response = client.get(f"/api/v1/scaffolding/students/{student_id}/performance")
@@ -125,7 +125,7 @@ class TestScaffoldingAPI:
     def test_get_performance_metrics_with_domain(self, client):
         """测试：获取特定领域的表现指标"""
         # Given: 学生 ID 和问题领域
-        student_id = 999
+        student_id = 205  # 使用独特的 ID
         problem_domain = "math"
 
         # When: 获取表现指标
@@ -142,7 +142,7 @@ class TestScaffoldingAPI:
     def test_get_performance_stats(self, client):
         """测试：获取表现统计"""
         # Given: 学生 ID
-        student_id = 999
+        student_id = 206  # 使用独特的 ID
 
         # When: 获取表现统计
         response = client.get(
