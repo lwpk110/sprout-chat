@@ -26,7 +26,6 @@ TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_eng
 # 覆盖数据库依赖
 def override_get_db():
     """测试数据库会话"""
-    Base.metadata.create_all(bind=test_engine)
     db = TestSessionLocal()
     try:
         yield db
@@ -35,14 +34,21 @@ def override_get_db():
 
 
 from app.models.database import get_db
-app.dependency_overrides[get_db] = override_get_db
 
 
 @pytest.fixture(scope="function")
 def client():
     """测试客户端"""
+    # 设置 dependency override
+    app.dependency_overrides[get_db] = override_get_db
+    # 每个测试前创建所有表
+    Base.metadata.create_all(bind=test_engine)
     with TestClient(app) as test_client:
         yield test_client
+    # 每个测试后清理
+    Base.metadata.drop_all(bind=test_engine)
+    # 清理 dependency override
+    app.dependency_overrides.clear()
 
 
 class TestScaffoldingAPI:
