@@ -4,7 +4,7 @@ SQLAlchemy 数据库模型
 定义所有数据库表结构
 """
 
-from sqlalchemy import Column, Integer, String, DateTime, Float, Boolean, ForeignKey, Text, JSON
+from sqlalchemy import Column, Integer, String, DateTime, Float, Boolean, ForeignKey, Text, JSON, Index, UniqueConstraint
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
@@ -160,10 +160,11 @@ class LearningRecord(Base):
     student = relationship("Student", back_populates="learning_records")
     wrong_answer_record = relationship("WrongAnswerRecord", back_populates="learning_record", uselist=False)
 
-    # 复合索引
+    # 复合索引 - 优化查询性能
     __table_args__ = (
-        # TODO: Add composite index for (student_id, created_at) in Alembic migration
-        # Index('idx_student_created', 'student_id', 'created_at'),
+        Index('idx_student_created', 'student_id', 'created_at'),
+        Index('idx_student_subject', 'student_id', 'subject'),
+        Index('idx_question_type', 'question_type'),
     )
 
 
@@ -201,6 +202,12 @@ class StudentProgress(Base):
 
     # 时间戳
     updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+
+    # 唯一约束和索引 - 确保每个学生每个科目只有一条进度记录
+    __table_args__ = (
+        UniqueConstraint('student_id', 'subject', name='uq_student_subject'),
+        Index('idx_student_mastery', 'student_id', 'mastery_level'),
+    )
 
     # 关系
     student = relationship("Student", back_populates="progress")
@@ -362,10 +369,11 @@ class KnowledgeMastery(Base):
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
-    # 复合索引
+    # 唯一约束和索引 - 确保每个学生每个知识点只有一条掌握度记录
     __table_args__ = (
-        # TODO: Add unique constraint for (student_id, knowledge_point_id) in Alembic migration
-        # UniqueConstraint('student_id', 'knowledge_point_id', name='uq_student_knowledge'),
+        UniqueConstraint('student_id', 'knowledge_point_id', name='uq_student_knowledge'),
+        Index('idx_student_mastery_status', 'student_id', 'mastery_status'),
+        Index('idx_knowledge_mastery', 'knowledge_point_id', 'mastery_status'),
     )
 
 
