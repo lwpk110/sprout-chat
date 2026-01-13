@@ -20,6 +20,7 @@ from app.api.knowledge import router as knowledge_router
 from app.api.knowledge import mastery_router as knowledge_mastery_router
 from app.api.socratic import router as socratic_router
 from app.api.scaffolding import router as scaffolding_router
+from app.api.validation import router as validation_router
 from app.services.engine import engine
 
 
@@ -140,6 +141,7 @@ app.include_router(knowledge_router)
 app.include_router(knowledge_mastery_router)
 app.include_router(socratic_router)
 app.include_router(scaffolding_router)
+app.include_router(validation_router)
 
 
 @app.get("/", tags=["root"])
