@@ -8,6 +8,7 @@ import { useSessionStore } from '../store/sessionStore'
 import { apiClient } from '../services/api'
 import VoiceInteraction from '../components/VoiceInteraction'
 import PhotoInteraction from '../components/PhotoInteraction'
+import TextInteraction from '../components/TextInteraction'
 import GuidedResponse from '../components/GuidedResponse'
 
 export default function StudentHome() {
@@ -117,9 +118,18 @@ export default function StudentHome() {
 
         {/* 交互模式选择 */}
         {sessionId && (
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             {/* 语音交互 */}
             <VoiceInteraction
+              sessionId={sessionId}
+              onMessageSent={(message) => {
+                console.log('消息已发送:', message)
+              }}
+              isLoading={isLoading}
+            />
+
+            {/* 文字交互 */}
+            <TextInteraction
               sessionId={sessionId}
               onMessageSent={(message) => {
                 console.log('消息已发送:', message)
@@ -168,7 +178,7 @@ export default function StudentHome() {
       {/* 底部提示 */}
       <footer className="mt-12 text-center">
         <p className="text-sprout-500 text-sm">
-          💡 点击麦克风或相机开始学习吧！
+          💡 点击麦克风、输入文字或拍照开始学习吧！
         </p>
       </footer>
     </div>
