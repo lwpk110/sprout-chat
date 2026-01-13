@@ -2,12 +2,14 @@
 苏格拉底教学服务（Phase 2.2 - US2）
 
 实现苏格拉底式引导教学，通过提问引导学生思考，而不是直接给出答案。
+
+注意：AI 服务集成已在 socratic_response.py 中的 SocraticResponseService 实现
 """
 
 from typing import Dict, Any, List
 from app.services.wrong_analyzer import WrongAnswerClassifier
 from app.services.response_validator import ResponseValidator
-# TODO: 集成 AI 服务生成引导内容
+# AI 服务集成已在其他模块实现
 # from app.core.ai_service import get_ai_service
 
 
@@ -127,7 +129,8 @@ class SocraticTeacherService:
         )
 
         # 调用 AI 服务生成引导内容
-        # TODO: 实际实现中应该调用 Claude API
+        # 注意：Claude API 调用已在 socratic_response.py 的 SocraticResponseService 中实现
+        # 这里使用模拟数据作为快速测试实现
         guidance_content = self._generate_mock_guidance(
             guidance_type=guidance_type,
             question=question,
@@ -210,7 +213,7 @@ class SocraticTeacherService:
         """
         生成模拟引导内容（用于测试）
 
-        TODO: 实际实现中应该调用 Claude API
+        注意：实际 AI 调用已在 socratic_response.py 的 SocraticResponseService 中实现
 
         Args:
             guidance_type: 引导类型

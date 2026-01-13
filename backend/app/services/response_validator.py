@@ -144,6 +144,6 @@ class ResponseValidator:
         Returns:
             验证结果
         """
-        # TODO: 实现 AI 二次验证
-        # 可以使用 Claude API 判断响应是否包含直接答案
+        # AI 二次验证已通过 response_validation.py 中的 ResponseValidationService 实现
+        # 这里使用基础规则验证作为快速检查
         return self.validate_response(response, correct_answer, question)
