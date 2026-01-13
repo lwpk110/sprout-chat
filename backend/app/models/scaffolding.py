@@ -5,7 +5,7 @@
 """
 from sqlalchemy import Column, Integer, String, DateTime, Float, Boolean, ForeignKey, Enum as SQLEnum, Index
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.models.database import Base
 from app.models.socratic import ScaffoldingLevel
@@ -21,8 +21,8 @@ class ScaffoldingLevelRecord(Base):
     level = Column(SQLEnum(ScaffoldingLevel), nullable=False)
 
     # 时间戳
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc), index=True)
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
     # 关系
     student = relationship("Student", foreign_keys=[student_id])
@@ -56,7 +56,7 @@ class PerformanceMetric(Base):
     question_type = Column(String(50))  # addition, subtraction, reading_comprehension, etc.
 
     # 时间戳
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc), index=True)
 
     # 关系
     student = relationship("Student", foreign_keys=[student_id])

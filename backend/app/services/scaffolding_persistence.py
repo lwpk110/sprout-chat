@@ -4,7 +4,7 @@
 提供脚手架层级和表现指标的数据库持久化功能
 """
 from typing import List, Optional, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
@@ -61,8 +61,8 @@ class ScaffoldingPersistenceService:
                 student_id=student_id,
                 problem_domain=problem_domain,
                 level=ScaffoldingLevel.MODERATE,
-                created_at=datetime.utcnow(),
-                updated_at=datetime.utcnow()
+                created_at=datetime.now(timezone.utc),
+                updated_at=datetime.now(timezone.utc)
             )
             self.db.add(record)
             self.db.commit()
@@ -92,7 +92,7 @@ class ScaffoldingPersistenceService:
 
         # 更新层级
         record.level = new_level
-        record.updated_at = datetime.utcnow()
+        record.updated_at = datetime.now(timezone.utc)
 
         self.db.commit()
         self.db.refresh(record)
@@ -138,7 +138,7 @@ class ScaffoldingPersistenceService:
             self_corrected=self_corrected,
             scaffolding_level_at_time=scaffolding_level_at_time,
             question_type=question_type,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
 
         self.db.add(metric)

@@ -5,9 +5,9 @@ SQLAlchemy 数据库模型
 """
 
 from sqlalchemy import Column, Integer, String, DateTime, Float, Boolean, ForeignKey, Text, JSON
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 
 Base = declarative_base()
 
@@ -28,8 +28,8 @@ class User(Base):
     is_verified = Column(Boolean, default=False)
 
     # 时间戳
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
     last_login = Column(DateTime)
 
     # 关系
@@ -54,8 +54,8 @@ class Student(Base):
     is_active = Column(Boolean, default=True)
 
     # 时间戳
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
     # 关系
     parent = relationship("User", back_populates="students")
@@ -79,8 +79,8 @@ class ConversationSession(Base):
     is_active = Column(Boolean, default=True)
 
     # 时间戳
-    created_at = Column(DateTime, default=datetime.utcnow)
-    last_activity = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    last_activity = Column(DateTime, default=datetime.now(timezone.utc))
 
     # 关系
     student = relationship("Student", back_populates="sessions")
@@ -102,7 +102,7 @@ class ConversationMessage(Base):
     json_metadata = Column(JSON)  # 存储额外的对话信息
 
     # 时间戳
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
     # 关系
     session = relationship("ConversationSession", back_populates="messages")
@@ -137,7 +137,7 @@ class LearningRecord(Base):
     hints_used = Column(Integer, default=0)
 
     # 时间信息（Phase 2.2 优化）
-    question_time = Column(DateTime, default=datetime.utcnow)
+    question_time = Column(DateTime, default=datetime.now(timezone.utc))
     answer_time = Column(DateTime)
     response_duration = Column(Float)  # 保留兼容性（秒）
     time_spent_seconds = Column(Integer, nullable=False)  # 答题耗时（秒）Phase 2.2
@@ -146,8 +146,8 @@ class LearningRecord(Base):
     knowledge_point_id = Column(Integer, ForeignKey("knowledge_points.id"), index=True)
 
     # 时间戳
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc), index=True)
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
     # 教学信息
     strategy_used = Column(String(100))
@@ -200,7 +200,7 @@ class StudentProgress(Base):
     last_activity = Column(DateTime)
 
     # 时间戳
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
     # 关系
     student = relationship("Student", back_populates="progress")
@@ -233,8 +233,8 @@ class ParentalControl(Base):
     break_duration = Column(Integer, default=10)  # 分钟
 
     # 时间戳
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
     # 关系
     student = relationship("Student", back_populates="parental_controls")
@@ -277,8 +277,8 @@ class Problem(Base):
     created_by = Column(String(50))
 
     # 时间戳
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
 
 # =============================================================================
@@ -304,7 +304,7 @@ class WrongAnswerRecord(Base):
     resolved_at = Column(DateTime)
 
     # 时间戳
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
     # 关系
     learning_record = relationship("LearningRecord", back_populates="wrong_answer_record")
@@ -326,8 +326,8 @@ class KnowledgePoint(Base):
     parent_id = Column(Integer, ForeignKey("knowledge_points.id"), index=True)
 
     # 时间戳
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
     # 关系（自引用多对多：前置知识点）
     prerequisites = relationship(
@@ -359,8 +359,8 @@ class KnowledgeMastery(Base):
 
     # 时间信息
     last_practiced_at = Column(DateTime, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
     # 复合索引
     __table_args__ = (
@@ -379,7 +379,7 @@ class KnowledgePointDependency(Base):
 
     knowledge_point_id = Column(Integer, ForeignKey("knowledge_points.id"), primary_key=True)
     prerequisite_id = Column(Integer, ForeignKey("knowledge_points.id"), primary_key=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
 
 # 数据库会话管理

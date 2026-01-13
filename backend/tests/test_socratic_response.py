@@ -101,12 +101,10 @@ class TestSocraticResponseService:
             mock_settings.ai_max_tokens = 1000
             mock_settings.ai_temperature = 0.7
 
-            with patch('app.services.socratic_response.get_ai_service') as mock_get_service:
-                # 设置模拟响应
-                mock_client = AsyncMock()
-                mock_client.messages.create = AsyncMock(return_value=mock_claude_response)
-                mock_get_service.return_value = mock_client
-
+            # Mock 服务的 _get_ai_client 方法
+            mock_client = AsyncMock()
+            mock_client.messages.create = AsyncMock(return_value=mock_claude_response)
+            with patch.object(service, '_get_ai_client', return_value=mock_client):
                 # 调用服务
                 request = SocraticRequest(
                     student_message="1 + 1 = ?",
@@ -135,12 +133,10 @@ class TestSocraticResponseService:
             mock_settings.ai_max_tokens = 1000
             mock_settings.ai_temperature = 0.7
 
-            with patch('app.services.socratic_response.get_ai_service') as mock_get_service:
-                # 设置模拟响应
-                mock_client = AsyncMock()
-                mock_client.chat.completions.create = AsyncMock(return_value=mock_openai_response)
-                mock_get_service.return_value = mock_client
-
+            # Mock 服务的 _get_ai_client 方法
+            mock_client = AsyncMock()
+            mock_client.chat.completions.create = AsyncMock(return_value=mock_openai_response)
+            with patch.object(service, '_get_ai_client', return_value=mock_client):
                 # 调用服务
                 request = SocraticRequest(
                     student_message="1 + 1 = ?",
@@ -167,12 +163,10 @@ class TestSocraticResponseService:
             mock_settings.ai_max_tokens = 1000
             mock_settings.ai_temperature = 0.7
 
-            with patch('app.services.socratic_response.get_ai_service') as mock_get_service:
-                # 设置模拟响应（直接答案）
-                mock_client = AsyncMock()
-                mock_client.messages.create = AsyncMock(return_value=mock_claude_direct_answer)
-                mock_get_service.return_value = mock_client
-
+            # Mock 服务的 _get_ai_client 方法
+            mock_client = AsyncMock()
+            mock_client.messages.create = AsyncMock(return_value=mock_claude_direct_answer)
+            with patch.object(service, '_get_ai_client', return_value=mock_client):
                 # 调用服务
                 request = SocraticRequest(
                     student_message="1 + 1 = ?",
