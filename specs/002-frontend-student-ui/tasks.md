@@ -80,12 +80,12 @@
 ### 3.1 Web Speech API Hook
 
 - [X] T016 [US1] 实现 useVoiceRecognition Hook (Web Speech API 封装) 在 frontend/src/hooks/useVoiceRecognition.ts
-- [ ] T017 [US1] 实现 AudioContext 音量检测 (静音检测) 在 frontend/src/utils/audio.ts
+- [X] T017 [US1] 实现 AudioContext 音量检测 (静音检测) 在 frontend/src/utils/audio.ts
 - [X] T018 [P] [US1] 编写 useVoiceRecognition 单元测试 在 frontend/src/hooks/__tests__/useVoiceRecognition.test.ts
 
 ### 3.2 VoiceInteraction 组件增强
 
-- [ ] T019 [US1] 增强 VoiceInteraction 组件 (错误处理、重试机制) 在 frontend/src/components/VoiceInteraction.tsx
+- [X] T019 [US1] 增强 VoiceInteraction 组件 (错误处理、重试机制) 在 frontend/src/components/VoiceInteraction.tsx
 - [ ] T020 [P] [US1] 编写 VoiceInteraction 组件单元测试 在 frontend/src/components/__tests__/VoiceInteraction.test.tsx
 
 ### 3.3 语音播报功能 (TTS)
