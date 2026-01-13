@@ -146,6 +146,7 @@ describe('PhotoInteraction Component', () => {
       Object.defineProperty(fileInput, 'files', {
         value: [file],
         writable: false,
+        configurable: true,
       })
 
       fireEvent.change(fileInput)
@@ -178,6 +179,7 @@ describe('PhotoInteraction Component', () => {
       Object.defineProperty(fileInput, 'files', {
         value: [file],
         writable: false,
+        configurable: true,
       })
 
       fireEvent.change(fileInput)
@@ -208,6 +210,7 @@ describe('PhotoInteraction Component', () => {
       Object.defineProperty(fileInput, 'files', {
         value: [file],
         writable: false,
+        configurable: true,
       })
 
       fireEvent.change(fileInput)
