@@ -18,6 +18,8 @@ from app.models.socratic import (
     ValidationResult,
     ScaffoldingLevel
 )
+from app.services.response_validation import ResponseValidationService
+from app.models.validation import StudentContext
 
 
 # 苏格拉底系统提示词
@@ -124,6 +126,7 @@ class SocraticResponseService:
         """初始化服务"""
         self.ai_client = None
         self.config = None
+        self.validator = ResponseValidationService()
 
     def _get_ai_client(self):
         """获取 AI 客户端（延迟加载）"""
@@ -187,27 +190,72 @@ class SocraticResponseService:
             client = self._get_ai_client()
             ai_response = await self._call_ai_api(client, messages, scaffolding)
 
-            # 验证响应
-            validation_result = self.validate_response(
-                response=ai_response,
-                correct_answer=None  # 我们不知道正确答案
+            # 使用新的五维验证系统
+            student_context = StudentContext(
+                grade=int(student_level) if student_level and student_level.isdigit() else 1,
+                problem_type="math"  # 可以从 problem_context 推断
             )
 
-            # 如果验证失败，使用 fallback
+            validation_result = await self.validator.validate_socratic_response(
+                response=ai_response,
+                scaffolding_level=scaffolding,
+                student_context=student_context
+            )
+
+            # 如果验证失败，根据严重程度处理
             if not validation_result.is_valid:
-                ai_response = self._get_fallback_response(scaffolding)
-                validation_result = self.validate_response(ai_response, None)
+                if validation_result.overall_score < 0.5:
+                    # 严重违规：使用 fallback
+                    ai_response = self._get_fallback_response(scaffolding)
+                    # 重新验证 fallback
+                    validation_result = await self.validator.validate_socratic_response(
+                        response=ai_response,
+                        scaffolding_level=scaffolding,
+                        student_context=student_context
+                    )
+                else:
+                    # 轻微问题：使用更严格的提示重新生成
+                    ai_response = await self._regenerate_with_strict_prompt(
+                        client,
+                        messages,
+                        scaffolding,
+                        validation_result.failure_reasons
+                    )
+                    # 重新验证
+                    validation_result = await self.validator.validate_socratic_response(
+                        response=ai_response,
+                        scaffolding_level=scaffolding,
+                        student_context=student_context
+                    )
+
+            # 转换新的验证结果到旧格式（向后兼容）
+            legacy_validation_result = ValidationResult(
+                is_valid=validation_result.is_valid,
+                contains_question=validation_result.guiding_question_score >= 0.5,
+                contains_direct_answer=validation_result.direct_answer_violation,
+                tone_appropriate=True,  # 新系统默认为 True
+                length_appropriate=True,  # 新系统默认为 True
+                score=validation_result.overall_score,
+                reasons=validation_result.failure_reasons
+            )
 
             return SocraticResponse(
                 response=ai_response,
                 is_socratic=validation_result.is_valid,
-                validation_score=validation_result.score,
+                validation_score=validation_result.overall_score,
                 scaffolding_level=scaffolding,
-                validation_result=validation_result,
+                validation_result=legacy_validation_result,
                 metadata={
                     "model": settings.ai_model,
                     "provider": settings.ai_provider,
-                    "conversation_id": conversation_id
+                    "conversation_id": conversation_id,
+                    "validation_details": {
+                        "guiding_question_score": validation_result.guiding_question_score,
+                        "direct_answer_violation": validation_result.direct_answer_violation,
+                        "scaffolding_alignment": validation_result.scaffolding_alignment_score,
+                        "question_quality": validation_result.question_quality_score,
+                        "context_relevance": validation_result.context_relevance_score
+                    }
                 }
             )
 
@@ -420,6 +468,51 @@ class SocraticResponseService:
         }
 
         return fallback_responses.get(scaffolding, fallback_responses[ScaffoldingLevel.MODERATE])
+
+    async def _regenerate_with_strict_prompt(
+        self,
+        client,
+        original_messages: List[Dict[str, str]],
+        scaffolding: ScaffoldingLevel,
+        failure_reasons: List[str]
+    ) -> str:
+        """
+        使用更严格的提示重新生成响应
+
+        Args:
+            client: AI 客户端
+            original_messages: 原始消息列表
+            scaffolding: 脚手架层级
+            failure_reasons: 失败原因列表
+
+        Returns:
+            重新生成的响应
+        """
+        # 构建严格提示
+        strict_instruction = f"""
+**重要提醒**：上次生成的响应未通过验证，原因：
+{chr(10).join(f'- {reason}' for reason in failure_reasons)}
+
+**请务必遵守**：
+1. ✅ 必须包含引导性问题（用"你觉得"、"为什么"、"怎么"）
+2. ❌ 绝对不能直接给出答案
+3. ❌ 不能说"答案是"、"等于"、"应该是"
+4. ✅ 语言要简单，适合一年级学生
+5. ✅ 语气要温柔鼓励
+
+请重新生成响应。
+"""
+
+        # 在系统提示后添加严格指令
+        messages = [original_messages[0]]  # 系统提示
+        messages.append({
+            "role": "system",
+            "content": strict_instruction
+        })
+        messages.extend(original_messages[1:])  # 用户消息和对话历史
+
+        # 调用 API 重新生成
+        return await self._call_ai_api(client, messages, scaffolding)
 
 
 # 便捷函数
