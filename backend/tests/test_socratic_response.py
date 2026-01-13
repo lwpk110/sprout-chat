@@ -9,7 +9,7 @@
 5. 错误处理（API 失败）
 """
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from app.services.socratic_response import (
     SocraticResponseService,
     SocraticRequest,
@@ -72,163 +72,238 @@ class TestSocraticResponseService:
     @pytest.fixture
     def mock_claude_response(self):
         """模拟 Claude API 响应 - 正确的引导式响应"""
-        return Mock(
-            content="🌱 你觉得如果有 1 个苹果，妈妈又给了你 1 个，现在有几个呢？"
-        )
+        mock_response = Mock()
+        mock_response.content = [Mock(text="🌱 你觉得如果有 1 个苹果，妈妈又给了你 1 个，现在有几个呢？")]
+        return mock_response
 
     @pytest.fixture
     def mock_claude_direct_answer(self):
         """模拟 Claude API 响应 - 直接答案（应该被拒绝）"""
-        return Mock(
-            content="答案是 2"
-        )
+        mock_response = Mock()
+        mock_response.content = [Mock(text="答案是 2")]
+        return mock_response
+
+    @pytest.fixture
+    def mock_openai_response(self):
+        """模拟 OpenAI API 响应（智谱 GLM）"""
+        mock_response = Mock()
+        mock_choice = Mock()
+        mock_choice.message.content = "🌱 你觉得如果有 1 个苹果，妈妈又给了你 1 个，现在有几个呢？"
+        mock_response.choices = [mock_choice]
+        return mock_response
 
     @pytest.mark.asyncio
-    async def test_generate_socratic_response_success(self, service, mock_claude_response):
-        """测试：成功生成引导式响应"""
-        with patch('app.services.socratic_response.get_ai_client') as mock_client:
-            # 设置模拟响应
-            mock_ai = AsyncMock()
-            mock_ai.messages.create = AsyncMock(return_value=mock_claude_response)
-            mock_client.return_value = mock_ai
+    async def test_generate_socratic_response_success_anthropic(self, service, mock_claude_response):
+        """测试：成功生成引导式响应（Anthropic）"""
+        with patch('app.services.socratic_response.settings') as mock_settings:
+            mock_settings.ai_provider = "anthropic"
+            mock_settings.ai_model = "claude-3-5-sonnet"
+            mock_settings.ai_max_tokens = 1000
+            mock_settings.ai_temperature = 0.7
 
-            # 调用服务
-            request = SocraticRequest(
-                student_message="1 + 1 = ?",
-                problem_context="数学加法题",
-                scaffolding_level="moderate"
-            )
+            with patch('app.services.socratic_response.get_ai_service') as mock_get_service:
+                # 设置模拟响应
+                mock_client = AsyncMock()
+                mock_client.messages.create = AsyncMock(return_value=mock_claude_response)
+                mock_get_service.return_value = mock_client
 
-            response = await service.generate_response(
-                student_message=request.student_message,
-                problem_context=request.problem_context,
-                scaffolding_level=request.scaffolding_level
-            )
+                # 调用服务
+                request = SocraticRequest(
+                    student_message="1 + 1 = ?",
+                    problem_context="数学加法题",
+                    scaffolding_level="moderate"
+                )
 
-            # 验证响应
-            assert response.is_socratic is True
-            assert response.validation_score >= 0.8
-            assert "你觉得" in response.response or "？" in response.response
-            assert "答案" not in response.response
+                response = await service.generate_response(
+                    student_message=request.student_message,
+                    problem_context=request.problem_context,
+                    scaffolding_level=request.scaffolding_level
+                )
+
+                # 验证响应
+                assert response.is_socratic is True
+                assert response.validation_score >= 0.8
+                assert "你觉得" in response.response or "？" in response.response
+                assert "答案" not in response.response
+
+    @pytest.mark.asyncio
+    async def test_generate_socratic_response_success_openai(self, service, mock_openai_response):
+        """测试：成功生成引导式响应（OpenAI-compatible）"""
+        with patch('app.services.socratic_response.settings') as mock_settings:
+            mock_settings.ai_provider = "openai"
+            mock_settings.ai_model = "glm-4.7"
+            mock_settings.ai_max_tokens = 1000
+            mock_settings.ai_temperature = 0.7
+
+            with patch('app.services.socratic_response.get_ai_service') as mock_get_service:
+                # 设置模拟响应
+                mock_client = AsyncMock()
+                mock_client.chat.completions.create = AsyncMock(return_value=mock_openai_response)
+                mock_get_service.return_value = mock_client
+
+                # 调用服务
+                request = SocraticRequest(
+                    student_message="1 + 1 = ?",
+                    problem_context="数学加法题",
+                    scaffolding_level="moderate"
+                )
+
+                response = await service.generate_response(
+                    student_message=request.student_message,
+                    problem_context=request.problem_context,
+                    scaffolding_level=request.scaffolding_level
+                )
+
+                # 验证响应
+                assert response.is_socratic is True
+                assert response.validation_score >= 0.8
 
     @pytest.mark.asyncio
     async def test_reject_direct_answer(self, service, mock_claude_direct_answer):
         """测试：拒绝直接答案"""
-        with patch('app.services.socratic_response.get_ai_client') as mock_client:
-            # 设置模拟响应（直接答案）
-            mock_ai = AsyncMock()
-            mock_ai.messages.create = AsyncMock(return_value=mock_claude_direct_answer)
-            mock_client.return_value = mock_ai
+        with patch('app.services.socratic_response.settings') as mock_settings:
+            mock_settings.ai_provider = "anthropic"
+            mock_settings.ai_model = "claude-3-5-sonnet"
+            mock_settings.ai_max_tokens = 1000
+            mock_settings.ai_temperature = 0.7
 
-            # 调用服务
-            request = SocraticRequest(
-                student_message="1 + 1 = ?",
-                problem_context="数学加法题",
-                scaffolding_level="moderate"
-            )
+            with patch('app.services.socratic_response.get_ai_service') as mock_get_service:
+                # 设置模拟响应（直接答案）
+                mock_client = AsyncMock()
+                mock_client.messages.create = AsyncMock(return_value=mock_claude_direct_answer)
+                mock_get_service.return_value = mock_client
 
-            response = await service.generate_response(
-                student_message=request.student_message,
-                problem_context=request.problem_context,
-                scaffolding_level=request.scaffolding_level
-            )
+                # 调用服务
+                request = SocraticRequest(
+                    student_message="1 + 1 = ?",
+                    problem_context="数学加法题",
+                    scaffolding_level="moderate"
+                )
 
-            # 验证：应该被拒绝或重新生成
-            # 如果验证逻辑工作正常，is_socratic 应该为 False
-            # 或者服务应该使用 fallback 响应
-            assert response.is_socratic is False or "答案是" not in response.response
+                response = await service.generate_response(
+                    student_message=request.student_message,
+                    problem_context=request.problem_context,
+                    scaffolding_level=request.scaffolding_level
+                )
+
+                # 验证：当验证失败时，服务应该使用 fallback 响应
+                # fallback 响应是引导式的，所以 is_socratic 应该为 True
+                assert response.is_socratic is True
+                # fallback 响应不包含直接答案
+                assert "答案是 2" not in response.response
+                # 应该是 fallback 响应
+                assert "你觉得" in response.response or "我们" in response.response
 
     @pytest.mark.asyncio
     async def test_scaffolding_levels(self, service):
         """测试：不同脚手架层级的响应差异"""
-        with patch('app.services.socratic_response.get_ai_client') as mock_client:
-            mock_ai = AsyncMock()
+        with patch('app.services.socratic_response.settings') as mock_settings:
+            mock_settings.ai_provider = "anthropic"
+            mock_settings.ai_model = "claude-3-5-sonnet"
+            mock_settings.ai_max_tokens = 1000
+            mock_settings.ai_temperature = 0.7
 
-            # 测试高度引导
-            mock_ai.messages.create = AsyncMock(
-                return_value=Mock(content="让我们先看看题目里有几个数字。你找到了吗？")
-            )
-            mock_client.return_value = mock_ai
+            with patch('app.services.socratic_response.get_ai_service') as mock_get_service:
+                mock_client = AsyncMock()
 
-            response_highly_guided = await service.generate_response(
-                student_message="我不知道怎么做",
-                problem_context="2 + 3 = ?",
-                scaffolding_level="highly_guided"
-            )
+                # 测试高度引导
+                mock_response_highly_guided = Mock()
+                mock_response_highly_guided.content = [Mock(text="让我们先看看题目里有几个数字。你找到了吗？")]
+                mock_client.messages.create = AsyncMock(return_value=mock_response_highly_guided)
+                mock_get_service.return_value = mock_client
 
-            # 测试中度引导
-            mock_ai.messages.create = AsyncMock(
-                return_value=Mock(content="你觉得这道题应该先算哪一步？为什么？")
-            )
+                response_highly_guided = await service.generate_response(
+                    student_message="我不知道怎么做",
+                    problem_context="2 + 3 = ?",
+                    scaffolding_level="highly_guided"
+                )
 
-            response_moderate = await service.generate_response(
-                student_message="2 + 3 = ?",
-                problem_context="数学加法题",
-                scaffolding_level="moderate"
-            )
+                # 测试中度引导
+                mock_response_moderate = Mock()
+                mock_response_moderate.content = [Mock(text="你觉得这道题应该先算哪一步？为什么？")]
+                mock_client.messages.create = AsyncMock(return_value=mock_response_moderate)
 
-            # 测试最小引导
-            mock_ai.messages.create = AsyncMock(
-                return_value=Mock(content="你的方法很有创意！还有其他方法吗？")
-            )
+                response_moderate = await service.generate_response(
+                    student_message="2 + 3 = ?",
+                    problem_context="数学加法题",
+                    scaffolding_level="moderate"
+                )
 
-            response_minimal = await service.generate_response(
-                student_message="我做出来了！",
-                problem_context="2 + 3 = 5",
-                scaffolding_level="minimal"
-            )
+                # 测试最小引导
+                mock_response_minimal = Mock()
+                mock_response_minimal.content = [Mock(text="你的方法很有创意！还有其他方法吗？")]
+                mock_client.messages.create = AsyncMock(return_value=mock_response_minimal)
 
-            # 验证：不同层级应该有不同的 scaffolding_level
-            assert response_highly_guided.scaffolding_level == "highly_guided"
-            assert response_moderate.scaffolding_level == "moderate"
-            assert response_minimal.scaffolding_level == "minimal"
+                response_minimal = await service.generate_response(
+                    student_message="我做出来了！",
+                    problem_context="2 + 3 = 5",
+                    scaffolding_level="minimal"
+                )
+
+                # 验证：不同层级应该有不同的 scaffolding_level
+                assert response_highly_guided.scaffolding_level == "highly_guided"
+                assert response_moderate.scaffolding_level == "moderate"
+                assert response_minimal.scaffolding_level == "minimal"
 
     @pytest.mark.asyncio
     async def test_conversation_history_context(self, service):
         """测试：对话历史上下文管理"""
-        with patch('app.services.socratic_response.get_ai_client') as mock_client:
-            mock_ai = AsyncMock()
-            mock_ai.messages.create = AsyncMock(
-                return_value=Mock(content="🌱 让我们再想想。你刚才说应该减法，为什么？")
-            )
-            mock_client.return_value = mock_ai
+        with patch('app.services.socratic_response.settings') as mock_settings:
+            mock_settings.ai_provider = "anthropic"
+            mock_settings.ai_model = "claude-3-5-sonnet"
+            mock_settings.ai_max_tokens = 1000
+            mock_settings.ai_temperature = 0.7
 
-            conversation_history = [
-                {"role": "user", "content": "3 - 1 = ?"},
-                {"role": "assistant", "content": "你觉得如果有 3 个苹果..."},
-                {"role": "user", "content": "应该用减法"}
-            ]
+            with patch('app.services.socratic_response.get_ai_service') as mock_get_service:
+                mock_client = AsyncMock()
+                mock_response = Mock()
+                mock_response.content = [Mock(text="🌱 让我们再想想。你刚才说应该减法，为什么？")]
+                mock_client.messages.create = AsyncMock(return_value=mock_response)
+                mock_get_service.return_value = mock_client
 
-            response = await service.generate_response(
-                student_message="应该用减法",
-                problem_context="数学减法题",
-                conversation_history=conversation_history
-            )
+                conversation_history = [
+                    {"role": "user", "content": "3 - 1 = ?"},
+                    {"role": "assistant", "content": "你觉得如果有 3 个苹果..."},
+                    {"role": "user", "content": "应该用减法"}
+                ]
 
-            # 验证：服务应该使用对话历史
-            assert response.is_socratic is True
-            # 验证 AI 调用包含了历史记录
-            call_args = mock_ai.messages.create.call_args
-            messages = call_args[1]['messages']
-            assert len(messages) > 2  # 应该包含历史记录
+                response = await service.generate_response(
+                    student_message="应该用减法",
+                    problem_context="数学减法题",
+                    conversation_history=conversation_history
+                )
+
+                # 验证：服务应该使用对话历史
+                assert response.is_socratic is True
+                # 验证 AI 调用包含了历史记录
+                call_args = mock_client.messages.create.call_args
+                messages = call_args[1]['messages']
+                assert len(messages) > 2  # 应该包含历史记录
 
     @pytest.mark.asyncio
     async def test_api_error_handling(self, service):
         """测试：API 错误处理"""
-        with patch('app.services.socratic_response.get_ai_client') as mock_client:
-            mock_ai = AsyncMock()
-            # 模拟 API 失败
-            mock_ai.messages.create = AsyncMock(side_effect=Exception("API Error"))
-            mock_client.return_value = mock_ai
+        with patch('app.services.socratic_response.settings') as mock_settings:
+            mock_settings.ai_provider = "anthropic"
+            mock_settings.ai_model = "claude-3-5-sonnet"
+            mock_settings.ai_max_tokens = 1000
+            mock_settings.ai_temperature = 0.7
 
-            # 调用服务
-            with pytest.raises(Exception) as exc_info:
-                await service.generate_response(
+            with patch('app.services.socratic_response.get_ai_service') as mock_get_service:
+                # 模拟 API 失败
+                mock_client = AsyncMock()
+                mock_client.messages.create = AsyncMock(side_effect=Exception("API Error"))
+                mock_get_service.return_value = mock_client
+
+                # 调用服务 - 应该使用 fallback 而不是抛出异常
+                response = await service.generate_response(
                     student_message="1 + 1 = ?",
                     problem_context="数学加法题"
                 )
 
-            assert "API Error" in str(exc_info.value)
+                # 验证：应该使用 fallback 响应
+                assert response.response is not None
+                assert response.is_socratic is True
 
 
 class TestValidationLogic:
@@ -333,36 +408,48 @@ class TestEdgeCases:
     @pytest.mark.asyncio
     async def test_invalid_scaffolding_level(self, service):
         """测试：无效的脚手架层级"""
-        with patch('app.services.socratic_response.get_ai_client') as mock_client:
-            mock_ai = AsyncMock()
-            mock_ai.messages.create = AsyncMock(
-                return_value=Mock(content="🌱 你觉得...")
-            )
-            mock_client.return_value = mock_ai
+        with patch('app.services.socratic_response.settings') as mock_settings:
+            mock_settings.ai_provider = "anthropic"
+            mock_settings.ai_model = "claude-3-5-sonnet"
+            mock_settings.ai_max_tokens = 1000
+            mock_settings.ai_temperature = 0.7
 
-            # 应该回退到默认值 "moderate"
-            response = await service.generate_response(
-                student_message="1 + 1 = ?",
-                problem_context="数学题",
-                scaffolding_level="invalid_level"
-            )
+            with patch('app.services.socratic_response.get_ai_service') as mock_get_service:
+                mock_client = AsyncMock()
+                mock_response = Mock()
+                mock_response.content = [Mock(text="🌱 你觉得...")]
+                mock_client.messages.create = AsyncMock(return_value=mock_response)
+                mock_get_service.return_value = mock_client
 
-            assert response.scaffolding_level == "moderate"
+                # 应该回退到默认值 "moderate"
+                response = await service.generate_response(
+                    student_message="1 + 1 = ?",
+                    problem_context="数学题",
+                    scaffolding_level="invalid_level"
+                )
+
+                assert response.scaffolding_level == "moderate"
 
     @pytest.mark.asyncio
     async def test_unicode_and_emoji(self, service):
         """测试：Unicode 字符和 Emoji 支持"""
-        with patch('app.services.socratic_response.get_ai_client') as mock_client:
-            mock_ai = AsyncMock()
-            mock_ai.messages.create = AsyncMock(
-                return_value=Mock(content="🌱✨🎨 你觉得这道题有趣吗？🤔💭")
-            )
-            mock_client.return_value = mock_ai
+        with patch('app.services.socratic_response.settings') as mock_settings:
+            mock_settings.ai_provider = "anthropic"
+            mock_settings.ai_model = "claude-3-5-sonnet"
+            mock_settings.ai_max_tokens = 1000
+            mock_settings.ai_temperature = 0.7
 
-            response = await service.generate_response(
-                student_message="这道题好难",
-                problem_context="数学题"
-            )
+            with patch('app.services.socratic_response.get_ai_service') as mock_get_service:
+                mock_client = AsyncMock()
+                mock_response = Mock()
+                mock_response.content = [Mock(text="🌱✨🎨 你觉得这道题有趣吗？🤔💭")]
+                mock_client.messages.create = AsyncMock(return_value=mock_response)
+                mock_get_service.return_value = mock_client
 
-            assert response.is_socratic is True
-            assert "🌱" in response.response or "✨" in response.response
+                response = await service.generate_response(
+                    student_message="这道题好难",
+                    problem_context="数学题"
+                )
+
+                assert response.is_socratic is True
+                assert "🌱" in response.response or "✨" in response.response
