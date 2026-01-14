@@ -20,6 +20,18 @@ export default {
           900: '#234823',
         },
       },
+      fontSize: {
+        'sprout-base': ['18px', '1.5'],    // Body text - age appropriate
+        'sprout-lg': ['24px', '1.4'],      // Titles
+        'sprout-xl': ['28px', '1.3'],      // Main titles
+        'sprout-sm': ['16px', '1.5'],      // Secondary text
+      },
+      minWidth: {
+        '48': '12rem',  // Minimum touch target for children
+      },
+      minHeight: {
+        '48': '12rem',  // Minimum touch target for children
+      },
     },
   },
   plugins: [],
