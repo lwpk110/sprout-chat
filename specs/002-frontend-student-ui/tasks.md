@@ -96,7 +96,7 @@
 ### 3.4 TextInteraction 组件增强
 
 - [X] T023 [P] [US1] 增强 TextInteraction 组件 (fallback 方案) 在 frontend/src/components/TextInteraction.tsx
-- [ ] T024 [P] [US1] 编写 TextInteraction 组件单元测试 在 frontend/src/components/__tests__/TextInteraction.test.tsx
+- [X] T024 [P] [US1] 编写 TextInteraction 组件单元测试 在 frontend/src/components/__tests__/TextInteraction.test.tsx
 
 ### 3.5 Zustand Store 扩展
 
