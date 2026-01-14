@@ -100,8 +100,8 @@
 
 ### 3.5 Zustand Store 扩展
 
-- [ ] T025 [US1] 扩展 sessionStore 添加连续答对计数 在 frontend/src/store/sessionStore.ts
-- [ ] T026 [US1] 实现 achievement 解锁逻辑 在 frontend/src/store/sessionStore.ts
+- [X] T025 [US1] 扩展 sessionStore 添加连续答对计数 在 frontend/src/store/sessionStore.ts
+- [X] T026 [US1] 实现 achievement 解锁逻辑 在 frontend/src/store/sessionStore.ts
 
 ### 3.6 集成测试
 
