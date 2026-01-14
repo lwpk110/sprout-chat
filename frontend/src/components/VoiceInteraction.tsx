@@ -330,6 +330,26 @@ export default function VoiceInteraction({
         </p>
       </div>
 
+      {/* Fallback 提示（语音不可用时） */}
+      {!isSupported && (
+        <div className="mb-6 p-6 bg-yellow-50 rounded-2xl border-2 border-yellow-300">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <div className="text-5xl">😅</div>
+            <div>
+              <h3 className="text-xl font-bold text-yellow-900 mb-2">
+                语音功能暂不可用
+              </h3>
+              <p className="text-lg text-yellow-800 mb-3">
+                你的浏览器不支持语音识别
+              </p>
+              <p className="text-base text-yellow-700">
+                💡 小贴士：可以使用右侧的文字输入与小芽对话
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 错误提示 */}
       {errorMessage && (
         <div className="mb-6 p-4 bg-red-50 rounded-2xl border-2 border-red-200">
@@ -396,7 +416,7 @@ export default function VoiceInteraction({
         {!isListening ? (
           <button
             onClick={handleStartListening}
-            disabled={disabled}
+            disabled={disabled || !isSupported}
             className={`
               w-32 h-32 rounded-full shadow-2xl
               bg-gradient-to-br from-sprout-400 to-sprout-600

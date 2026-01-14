@@ -133,17 +133,23 @@ describe('VoiceInteraction Component', () => {
       })
     })
 
-    it('在不支持语音识别的浏览器中应该显示错误', async () => {
+    it('在不支持语音识别的浏览器中应该显示 fallback 提示', async () => {
+      // 重新渲染组件，设置 isSupported 为 false
+      const { rerender } = render(<VoiceInteraction {...defaultProps} />)
+
+      // 修改 mock 值
       mockIsSupported = false
 
-      render(<VoiceInteraction {...defaultProps} />)
+      // 重新渲染组件
+      rerender(<VoiceInteraction {...defaultProps} />)
 
+      // 应该显示 fallback 提示，而不是调用 setError
+      expect(screen.getByText('语音功能暂不可用')).toBeInTheDocument()
+      expect(screen.getByText(/你的浏览器不支持语音识别/)).toBeInTheDocument()
+
+      // 按钮应该被禁用
       const startButton = screen.getByRole('button')
-      fireEvent.click(startButton)
-
-      await waitFor(() => {
-        expect(mockSetError).toHaveBeenCalledWith('你的浏览器不支持语音识别')
-      })
+      expect(startButton).toBeDisabled()
     })
 
     it('无法启动语音识别时应该显示错误', async () => {
@@ -322,6 +328,54 @@ describe('VoiceInteraction Component', () => {
       await waitFor(() => {
         expect(screen.getByText('🔴 正在听你说话...')).toBeInTheDocument()
       })
+    })
+  })
+
+  describe('Fallback 方案（语音不可用时）', () => {
+    it('应该在浏览器不支持语音识别时显示 fallback 提示', () => {
+      const { rerender } = render(<VoiceInteraction {...defaultProps} />)
+
+      // 修改 mock 值并重新渲染
+      mockIsSupported = false
+      rerender(<VoiceInteraction {...defaultProps} />)
+
+      // 应该显示 fallback 提示卡片（分别匹配各个元素）
+      expect(screen.getByText('😅')).toBeInTheDocument()
+      expect(screen.getByText('语音功能暂不可用')).toBeInTheDocument()
+      expect(screen.getByText(/你的浏览器不支持语音识别/)).toBeInTheDocument()
+    })
+
+    it('应该在 fallback 提示中引导用户使用文字输入', () => {
+      const { rerender } = render(<VoiceInteraction {...defaultProps} />)
+
+      // 修改 mock 值并重新渲染
+      mockIsSupported = false
+      rerender(<VoiceInteraction {...defaultProps} />)
+
+      // 应该显示引导文案
+      expect(screen.getByText(/可以使用右侧的文字输入/)).toBeInTheDocument()
+    })
+
+    it('应该在 fallback 模式下禁用麦克风按钮', () => {
+      const { rerender } = render(<VoiceInteraction {...defaultProps} />)
+
+      // 修改 mock 值并重新渲染
+      mockIsSupported = false
+      rerender(<VoiceInteraction {...defaultProps} />)
+
+      // 麦克风按钮应该被禁用
+      const button = screen.getByRole('button')
+      expect(button).toBeDisabled()
+    })
+
+    it('应该在支持语音识别时不显示 fallback 提示', () => {
+      mockIsSupported = true
+
+      render(<VoiceInteraction {...defaultProps} />)
+
+      // 不应该显示 fallback 提示
+      expect(screen.queryByText('😅')).not.toBeInTheDocument()
+      expect(screen.queryByText('语音功能暂不可用')).not.toBeInTheDocument()
     })
   })
 })
