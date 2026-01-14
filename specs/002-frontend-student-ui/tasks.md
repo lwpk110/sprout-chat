@@ -105,7 +105,7 @@
 
 ### 3.6 集成测试
 
-- [ ] T027 [US1] 编写语音对话端到端集成测试 在 frontend/tests/integration/voice-conversation.test.tsx
+- [X] T027 [US1] 编写语音对话端到端集成测试 在 frontend/tests/integration/voice-conversation.test.tsx
 
 **完成标准**:
 - 语音录制延迟 ≤ 500ms
