@@ -689,18 +689,36 @@ tm set-status --id=LWP-X --status=done
 ## Agent Skills
 
 ### 状态
-**已创建 6 个 Agent Skills**，用于规范开发流程和教学方法。
+**已创建 7 个 Agent Skills**，用于规范开发流程和教学方法。
 
 ### Skills 列表
 
 | Skill | 路径 | 用途 |
 |-------|------|------|
+| `gatekeeper` | `.claude/skills/gatekeeper/SKILL.md` | **守门人 - 检查开发流程前置条件** |
 | `tdd-cycle` | `.claude/skills/tdd-cycle/SKILL.md` | TDD 红-绿-重构循环 |
 | `git-commit` | `.claude/skills/git-commit/SKILL.md` | Git 提交规范 |
 | `sprout-persona` | `.claude/skills/sprout-persona/SKILL.md` | 小芽人格定义 |
 | `teaching-strategy` | `.claude/skills/teaching-strategy/SKILL.md` | 教学策略选择 |
 | `socratic-teaching` | `.claude/skills/socratic-teaching/SKILL.md` | 苏格拉底引导 |
 | `github-sync` | `.claude/skills/github-sync/SKILL.md` | GitHub-Taskmaster 同步 |
+
+### ⚠️ Gatekeeper Skill（重要）
+
+**职责**：确保所有开发类 Agent 在工作前满足前置条件
+
+**检查内容**：
+- 规范文档存在性（`specs/*/spec.md`）
+- 规范验证状态（`/speckit.analyze` 通过）
+- 实施计划存在（`specs/*/plan.md`）
+- 任务清单存在（`specs/*/tasks.md`）
+- Taskmaster 任务状态（`in-progress`）
+- 设计交付物（ADR 或 UI 设计稿）
+
+**使用方式**：
+- 所有开发类 Agent 自动调用
+- 检查失败时自动返回拒绝消息和引导
+- 详细逻辑：`.claude/skills/gatekeeper/SKILL.md`
 
 ### 使用方法
 
@@ -712,6 +730,7 @@ tm set-status --id=LWP-X --status=done
 ### 目录结构
 ```
 .claude/skills/
+├── gatekeeper/SKILL.md      ⚠️ 守门人
 ├── tdd-cycle/SKILL.md
 ├── git-commit/SKILL.md
 ├── sprout-persona/SKILL.md
