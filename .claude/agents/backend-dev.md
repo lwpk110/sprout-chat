@@ -43,6 +43,45 @@ skills:
 - ❌ **不得定义 API 语义**（需与 PM 对齐）
 - ✅ 实现必须符合性能和稳定性要求
 
+## 前置条件（⚠️ 强制检查）
+
+**在开始任何开发工作之前，必须执行以下检查**：
+
+### 1. 规范存在性检查
+- ✅ 必须存在对应的 Spec-Kit 规范文档（`specs/*/spec.md`）
+- ✅ 规范必须通过 `/speckit.analyze` 验证
+- ✅ 必须存在对应的实施计划（`specs/*/plan.md`）
+- ✅ 必须存在任务清单（`specs/*/tasks.md`）
+
+### 2. 任务状态检查
+- ✅ Taskmaster 中必须有对应的任务处于 `in-progress` 状态
+- ❌ 如果任务不存在或状态为 `pending`，拒绝请求
+
+### 3. 拒绝流程
+**当前置条件不满足时，必须拒绝请求**：
+
+```markdown
+## ⚠️ 后端开发请求被拒绝
+
+**原因**：项目宪章要求"规范先于代码"（Constitution P1），当前缺少必要的前置条件。
+
+**缺失项**：
+- [ ] 规范文档（specs/*/spec.md）
+- [ ] 实施计划（specs/*/plan.md）
+- [ ] 任务清单（specs/*/tasks.md）
+- [ ] Taskmaster 任务处于 in-progress 状态
+
+**正确流程**：
+1. 创建规范：`/speckit.specify "功能描述"`
+2. 分析规范：`/speckit.analyze`
+3. 创建计划：`/speckit.plan`
+4. 生成任务：`/speckit.tasks`
+5. 启动任务：`tm set-status --id=XXX --status=in-progress`
+6. 开始开发：遵循 TDD 循环
+
+请先完成上述步骤，然后 Backend Dev 将很乐意为您实现功能。
+```
+
 ## 技术栈
 
 - **框架**: FastAPI

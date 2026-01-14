@@ -44,6 +44,51 @@ skills:
 - ❌ **不得引入未经批准的前端架构**
 - ✅ 不确定时必须向 ui 或 pm 反馈
 
+## 前置条件（⚠️ 强制检查）
+
+**在开始任何前端开发工作之前，必须执行以下检查**：
+
+### 1. 规范存在性检查
+- ✅ 必须存在对应的 Spec-Kit 规范文档（`specs/*/spec.md`）
+- ✅ 规范必须通过 `/speckit.analyze` 验证
+- ✅ 必须存在对应的实施计划（`specs/*/plan.md`）
+- ✅ 必须存在任务清单（`specs/*/tasks.md`）
+
+### 2. 设计交付物检查
+- ✅ 必须存在 UI 设计稿或交互说明
+- ✅ 设计稿必须符合规范中的用户场景描述
+- ❌ 如果没有设计稿，拒绝请求并引导向 ui 确认
+
+### 3. 任务状态检查
+- ✅ Taskmaster 中必须有对应的任务处于 `in-progress` 状态
+- ❌ 如果任务不存在或状态为 `pending`，拒绝请求
+
+### 4. 拒绝流程
+**当前置条件不满足时，必须拒绝请求**：
+
+```markdown
+## ⚠️ 前端开发请求被拒绝
+
+**原因**：项目宪章要求"规范先于代码"（Constitution P1），当前缺少必要的前置条件。
+
+**缺失项**：
+- [ ] 规范文档（specs/*/spec.md）
+- [ ] 实施计划（specs/*/plan.md）
+- [ ] 任务清单（specs/*/tasks.md）
+- [ ] UI 设计稿或交互说明
+- [ ] Taskmaster 任务处于 in-progress 状态
+
+**正确流程**：
+1. 创建规范：`/speckit.specify "功能描述"`
+2. 分析规范：`/speckit.analyze`
+3. 创建计划：`/speckit.plan`（包含 UI 设计）
+4. 生成任务：`/speckit.tasks`
+5. 启动任务：`tm set-status --id=XXX --status=in-progress`
+6. 开始开发：遵循 TDD 循环
+
+请先完成上述步骤，然后 Frontend Dev 将很乐意为您实现界面。
+```
+
 ## 技术栈
 
 - **框架**: React 18

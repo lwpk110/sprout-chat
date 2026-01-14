@@ -636,6 +636,7 @@ npm run lint
 ## Active Technologies
 - Python 3.11+ + FastAPI, SQLAlchemy, Pydantic v2, Claude API (Anthropic SDK) (001-learning-management)
 - SQLite (开发) / PostgreSQL (生产) (001-learning-management)
+- TypeScript 5.2 + React 18.2 (002-frontend-student-ui)
 
 ## Recent Changes
 - 001-learning-management: Added Python 3.11+ + FastAPI, SQLAlchemy, Pydantic v2, Claude API (Anthropic SDK)
@@ -723,6 +724,107 @@ tm set-status --id=LWP-X --status=done
 ### 文档参考
 - [Agent Skills 官方文档](https://code.claude.com/docs/en/skills)
 - [Agent Skills 研究报告](../docs/agent-skills-research.md)
+
+---
+
+## Agent 调用顺序规范 ⚠️ **强制执行**
+
+### 核心原则
+
+**项目宪章要求：规范先于代码（Constitution P1）**
+
+所有 Agent 的调用必须遵循严格的顺序，禁止跳过规范阶段直接进入架构设计或代码实现。
+
+### 正确的调用流程
+
+```
+用户需求
+    ↓
+/speckit.specify "功能描述"    ← 创建规范（Librarian Agent）
+    ↓
+/speckit.analyze              ← 分析规范完整性
+    ↓
+/speckit.plan                 ← 创建实施计划（Architect Agent 参与）
+    ↓
+/speckit.tasks                ← 生成任务清单
+    ↓
+tm set-status --id=XXX --status=in-progress  ← 启动任务
+    ↓
+/ralph-loop 或 @backend-dev/@frontend-dev  ← 实施（Dev Agent）
+    ↓
+/speckit.analyze              ← 验证合规性
+    ↓
+tm set-status --id=XXX --status=done  ← 标记完成
+```
+
+### ❌ 禁止的调用流程
+
+| 错误流程 | 违反原则 | 后果 |
+|---------|---------|------|
+| `用户 → @architect → 架构设计` | 跳过规范阶段（P1） | **Architect 会拒绝请求** |
+| `用户 → @backend-dev → 编写代码` | 跳过规范和架构（P1） | **Backend Dev 会拒绝请求** |
+| `用户 → @frontend-dev → 实现界面` | 跳过规范和设计（P1） | **Frontend Dev 会拒绝请求** |
+| `@architect → 直接修改架构` | 无规范依据 | **Architect 会拒绝请求** |
+
+### Agent 前置条件检查
+
+所有开发类 Agent 都会在启动时执行**强制检查**：
+
+#### 1. Architect Agent 前置条件
+```bash
+✅ 存在 specs/*/spec.md
+✅ 规范通过 /speckit.analyze 验证
+❌ 如果无规范 → 拒绝请求并引导用户
+```
+
+#### 2. Backend/Frontend/Dev Agent 前置条件
+```bash
+✅ 存在 specs/*/spec.md
+✅ 存在 specs/*/plan.md
+✅ 存在 specs/*/tasks.md
+✅ Taskmaster 任务处于 in-progress 状态
+❌ 如果缺失 → 拒绝请求并引导用户
+```
+
+### 快速参考
+
+| 场景 | 正确命令 | 错误命令 |
+|------|---------|---------|
+| 新功能开发 | `/speckit.specify` → `/speckit.plan` → `/speckit.tasks` | `@architect` 或 `@dev` |
+| 架构咨询 | `/speckit.plan`（内部调用 Architect） | `@architect` 直接咨询 |
+| 后端实现 | 先 `/speckit.tasks`，后 `@backend-dev` | 直接 `@backend-dev` |
+| 前端实现 | 先 `/speckit.tasks`，后 `@frontend-dev` | 直接 `@frontend-dev` |
+| 快速修复 | `/speckit.specify "Fix bug"` → TDD | 直接修改代码 |
+
+### 拒绝消息示例
+
+当您直接调用开发类 Agent 时，会收到类似消息：
+
+```markdown
+## ⚠️ 架构设计请求被拒绝
+
+**原因**：项目宪章要求"规范先于代码"（Constitution P1），当前缺少对应的规范文档。
+
+**正确流程**：
+1. 创建规范：`/speckit.specify "功能描述"`
+2. 分析规范：`/speckit.analyze`
+3. 创建计划：`/speckit.plan`（此步骤会自动调用 Architect）
+4. 生成任务：`/speckit.tasks`
+
+**参考文档**：
+- 项目宪章：`.specify/memory/constitution.md`
+- 本文档："Agent 调用顺序规范" 章节
+
+请先完成规范创建，然后 Architect 将很乐意为您提供架构设计服务。
+```
+
+### 为什么要强制执行？
+
+1. **防止范围蔓延**：规范明确边界，避免架构过度设计
+2. **可追溯性**：每个架构决策都能追溯到需求
+3. **团队协作**：所有参与者对"做什么"达成共识
+4. **质量保证**：规范通过分析后才进入设计阶段
+5. **符合宪章**：遵守项目宪章 P1 原则
 
 ---
 
