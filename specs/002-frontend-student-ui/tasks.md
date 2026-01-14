@@ -86,7 +86,7 @@
 ### 3.2 VoiceInteraction 组件增强
 
 - [X] T019 [US1] 增强 VoiceInteraction 组件 (错误处理、重试机制) 在 frontend/src/components/VoiceInteraction.tsx
-- [ ] T020 [P] [US1] 编写 VoiceInteraction 组件单元测试 在 frontend/src/components/__tests__/VoiceInteraction.test.tsx
+- [X] T020 [P] [US1] 编写 VoiceInteraction 组件单元测试 在 frontend/src/components/__tests__/VoiceInteraction.test.tsx
 
 ### 3.3 语音播报功能 (TTS)
 
