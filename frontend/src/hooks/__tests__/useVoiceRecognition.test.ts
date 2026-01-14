@@ -7,7 +7,7 @@ import { renderHook, act } from '@testing-library/react';
 import useVoiceRecognition from '../useVoiceRecognition';
 
 // Mock Web Speech API
-const mockSpeechRecognition = {
+let mockSpeechRecognitionInstance: any = {
   lang: '',
   continuous: false,
   interimResults: false,
@@ -21,7 +21,24 @@ const mockSpeechRecognition = {
   onerror: null as ((event: any) => void) | null,
 };
 
-const mockSpeechRecognitionConstructor = jest.fn(() => mockSpeechRecognition);
+const mockSpeechRecognitionConstructor = jest.fn(() => {
+  // Return a new instance each time to avoid shared state between tests
+  const instance = {
+    lang: '',
+    continuous: false,
+    interimResults: false,
+    maxAlternatives: 1,
+    start: jest.fn(),
+    stop: jest.fn(),
+    abort: jest.fn(),
+    onstart: null,
+    onend: null,
+    onresult: null,
+    onerror: null,
+  };
+  mockSpeechRecognitionInstance = instance;
+  return instance;
+});
 
 // @ts-ignore - Mocking window object
 global.window.SpeechRecognition = mockSpeechRecognitionConstructor;
@@ -31,10 +48,8 @@ global.window.webkitSpeechRecognition = mockSpeechRecognitionConstructor;
 describe('useVoiceRecognition Hook', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Reset mock state
-    mockSpeechRecognition.start.mockReset();
-    mockSpeechRecognition.stop.mockReset();
-    mockSpeechRecognition.abort.mockReset();
+    // Reset mock instance
+    mockSpeechRecognitionInstance = null;
   });
 
   describe('初始化状态', () => {
@@ -50,6 +65,10 @@ describe('useVoiceRecognition Hook', () => {
     });
 
     test('在不支持 Speech API 的浏览器中应该标记为不支持', () => {
+      // Save original
+      const originalSpeechRecognition = global.window.SpeechRecognition;
+      const originalWebkitSpeechRecognition = global.window.webkitSpeechRecognition;
+
       // @ts-ignore
       delete global.window.SpeechRecognition;
       // @ts-ignore
@@ -58,6 +77,12 @@ describe('useVoiceRecognition Hook', () => {
       const { result } = renderHook(() => useVoiceRecognition());
 
       expect(result.current.isSupported).toBe(false);
+
+      // Restore
+      // @ts-ignore
+      global.window.SpeechRecognition = originalSpeechRecognition;
+      // @ts-ignore
+      global.window.webkitSpeechRecognition = originalWebkitSpeechRecognition;
     });
   });
 
@@ -69,11 +94,15 @@ describe('useVoiceRecognition Hook', () => {
         result.current.startListening();
       });
 
-      expect(mockSpeechRecognition.start).toHaveBeenCalledTimes(1);
+      expect(mockSpeechRecognitionInstance.start).toHaveBeenCalledTimes(1);
       expect(result.current.isListening).toBe(true);
     });
 
     test('在不支持时调用应该返回 false', () => {
+      // Save original
+      const originalSpeechRecognition = global.window.SpeechRecognition;
+      const originalWebkitSpeechRecognition = global.window.webkitSpeechRecognition;
+
       // @ts-ignore
       delete global.window.SpeechRecognition;
       // @ts-ignore
@@ -88,6 +117,12 @@ describe('useVoiceRecognition Hook', () => {
 
       expect(success).toBe(false);
       expect(result.current.error).toBe('语音识别不支持');
+
+      // Restore
+      // @ts-ignore
+      global.window.SpeechRecognition = originalSpeechRecognition;
+      // @ts-ignore
+      global.window.webkitSpeechRecognition = originalWebkitSpeechRecognition;
     });
 
     test('已经在监听时不应该重复启动', () => {
@@ -97,13 +132,13 @@ describe('useVoiceRecognition Hook', () => {
         result.current.startListening();
       });
 
-      const firstCallCount = mockSpeechRecognition.start.mock.calls.length;
+      const firstCallCount = mockSpeechRecognitionInstance.start.mock.calls.length;
 
       act(() => {
         result.current.startListening();
       });
 
-      expect(mockSpeechRecognition.start).toHaveBeenCalledTimes(firstCallCount);
+      expect(mockSpeechRecognitionInstance.start).toHaveBeenCalledTimes(firstCallCount);
     });
   });
 
@@ -119,7 +154,7 @@ describe('useVoiceRecognition Hook', () => {
         result.current.stopListening();
       });
 
-      expect(mockSpeechRecognition.stop).toHaveBeenCalledTimes(1);
+      expect(mockSpeechRecognitionInstance.stop).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -133,6 +168,7 @@ describe('useVoiceRecognition Hook', () => {
 
       // 模拟语音识别成功事件
       const mockResult = {
+        resultIndex: 0,
         results: [
           {
             0: {
@@ -145,8 +181,8 @@ describe('useVoiceRecognition Hook', () => {
       };
 
       act(() => {
-        if (mockSpeechRecognition.onresult) {
-          mockSpeechRecognition.onresult(mockResult);
+        if (mockSpeechRecognitionInstance.onresult) {
+          mockSpeechRecognitionInstance.onresult(mockResult);
         }
       });
 
@@ -162,6 +198,7 @@ describe('useVoiceRecognition Hook', () => {
 
       // 模拟临时结果
       const mockResult = {
+        resultIndex: 0,
         results: [
           {
             0: {
@@ -174,8 +211,8 @@ describe('useVoiceRecognition Hook', () => {
       };
 
       act(() => {
-        if (mockSpeechRecognition.onresult) {
-          mockSpeechRecognition.onresult(mockResult);
+        if (mockSpeechRecognitionInstance.onresult) {
+          mockSpeechRecognitionInstance.onresult(mockResult);
         }
       });
 
@@ -210,12 +247,12 @@ describe('useVoiceRecognition Hook', () => {
       };
 
       act(() => {
-        if (mockSpeechRecognition.onerror) {
-          mockSpeechRecognition.onerror(mockError);
+        if (mockSpeechRecognitionInstance.onerror) {
+          mockSpeechRecognitionInstance.onerror(mockError);
         }
       });
 
-      expect(result.current.error).toContain('permission');
+      expect(result.current.error).toContain('麦克风权限');
       expect(result.current.isListening).toBe(false);
     });
 
@@ -233,8 +270,8 @@ describe('useVoiceRecognition Hook', () => {
       };
 
       act(() => {
-        if (mockSpeechRecognition.onerror) {
-          mockSpeechRecognition.onerror(mockError);
+        if (mockSpeechRecognitionInstance.onerror) {
+          mockSpeechRecognitionInstance.onerror(mockError);
         }
       });
 
@@ -255,8 +292,8 @@ describe('useVoiceRecognition Hook', () => {
       };
 
       act(() => {
-        if (mockSpeechRecognition.onerror) {
-          mockSpeechRecognition.onerror(mockError);
+        if (mockSpeechRecognitionInstance.onerror) {
+          mockSpeechRecognitionInstance.onerror(mockError);
         }
       });
 
@@ -274,6 +311,7 @@ describe('useVoiceRecognition Hook', () => {
 
       // 设置一个识别结果
       const mockResult = {
+        resultIndex: 0,
         results: [
           {
             0: {
@@ -286,8 +324,8 @@ describe('useVoiceRecognition Hook', () => {
       };
 
       act(() => {
-        if (mockSpeechRecognition.onresult) {
-          mockSpeechRecognition.onresult(mockResult);
+        if (mockSpeechRecognitionInstance.onresult) {
+          mockSpeechRecognitionInstance.onresult(mockResult);
         }
       });
 
@@ -312,8 +350,8 @@ describe('useVoiceRecognition Hook', () => {
 
       // 模拟识别完成事件
       act(() => {
-        if (mockSpeechRecognition.onend) {
-          mockSpeechRecognition.onend(new Event('end'));
+        if (mockSpeechRecognitionInstance.onend) {
+          mockSpeechRecognitionInstance.onend(new Event('end'));
         }
       });
 
@@ -333,8 +371,8 @@ describe('useVoiceRecognition Hook', () => {
 
       unmount();
 
-      // 验证 stop 被调用
-      expect(mockSpeechRecognition.stop).toHaveBeenCalledTimes(1);
+      // 验证 abort 被调用 (not stop, because cleanup uses abort)
+      expect(mockSpeechRecognitionInstance.abort).toHaveBeenCalledTimes(1);
     });
   });
 });
