@@ -1,0 +1,505 @@
+openapi: 3.0.3
+info:
+  title: 小芽家教 - 对话 API (前端对接契约)
+  description: |
+    前端对接后端对话系统的 API 契约规范。
+    包含会话管理、语音输入、文字输入、对话历史等接口。
+  version: 1.0.0
+  contact:
+    name: 小芽家教前端团队
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: 本地开发环境 (通过 Vite proxy 代理)
+  - url: /api
+    description: 相对路径 (生产环境使用 Nginx 反向代理)
+
+tags:
+  - name: Conversations
+    description: 对话会话管理
+  - name: Voice Input
+    description: 语音输入处理
+  - name: Text Input
+    description: 文字输入处理
+  - name: History
+    description: 对话历史查询
+
+paths:
+  /conversations/create:
+    post:
+      tags:
+        - Conversations
+      summary: 创建学习会话
+      description: |
+        前端在页面加载时调用此接口创建新的学习会话。
+        会话创建后，前端应保存 session_id 用于后续所有交互。
+      operationId: createSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSessionRequest'
+            examples:
+              math_session:
+                summary: 数学科目会话
+                value:
+                  student_id: "student_12345"
+                  subject: "数学"
+                  student_age: 6
+                  topic: "学习伙伴"
+              chinese_session:
+                summary: 语文学科会话
+                value:
+                  student_id: "student_12345"
+                  subject: "语文"
+                  student_age: 6
+                  topic: "阅读练习"
+      responses:
+        '200':
+          description: 会话创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+              example:
+                session_id: "sess_abc123xyz"
+                student_id: "student_12345"
+                subject: "数学"
+                student_age: 6
+                created_at: "2025-01-13T10:30:00Z"
+                is_valid: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /conversations/voice:
+    post:
+      tags:
+        - Voice Input
+      summary: 处理语音输入
+      description: |
+        前端通过 Web Speech API 识别语音后，调用此接口发送识别文本。
+        后端返回 AI 的引导式教学响应。
+      operationId: sendVoiceInput
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoiceInputRequest'
+            examples:
+              math_question:
+                summary: 数学问题
+                value:
+                  session_id: "sess_abc123xyz"
+                  transcript: "7加5等于几"
+                  confidence: 0.92
+              wrong_answer:
+                summary: 错误答案
+                value:
+                  session_id: "sess_abc123xyz"
+                  transcript: "7加5等于11"
+                  confidence: 0.88
+      responses:
+        '200':
+          description: 语音处理成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationResponse'
+              examples:
+                guidance_response:
+                  summary: 引导式响应
+                  value:
+                    session_id: "sess_abc123xyz"
+                    response: "试着把7拆成5和几呢？"
+                    timestamp: "2025-01-13T10:30:15Z"
+                    response_type: "guidance"
+                encouragement_response:
+                  summary: 鼓励响应
+                  value:
+                    session_id: "sess_abc123xyz"
+                    response: "太棒了！你答对了！"
+                    timestamp: "2025-01-13T10:30:15Z"
+                    response_type: "encouragement"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/SessionNotFound'
+
+  /conversations/message:
+    post:
+      tags:
+        - Text Input
+      summary: 处理文字输入
+      description: |
+        前端处理用户通过文本框输入的文字消息。
+        后端返回 AI 的引导式教学响应。
+      operationId: sendTextInput
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TextInputRequest'
+            examples:
+              simple_question:
+                summary: 简单问题
+                value:
+                  session_id: "sess_abc123xyz"
+                  content: "3乘以4等于几"
+      responses:
+        '200':
+          description: 文字处理成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/SessionNotFound'
+
+  /conversations/{session_id}/history:
+    get:
+      tags:
+        - History
+      summary: 获取对话历史
+      description: |
+        获取指定会话的对话历史记录。
+        前端在页面刷新或重新进入时使用此接口恢复会话状态。
+      operationId: getHistory
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 会话 ID
+          example: "sess_abc123xyz"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 50
+          description: 返回记录数量限制
+          example: 20
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoryResponse'
+              example:
+                session_id: "sess_abc123xyz"
+                messages:
+                  - role: "user"
+                    content: "7加5等于几"
+                    timestamp: "2025-01-13T10:30:00Z"
+                  - role: "assistant"
+                    content: "试着把7拆成5和几呢？"
+                    timestamp: "2025-01-13T10:30:15Z"
+                total_count: 2
+        '404':
+          $ref: '#/components/responses/SessionNotFound'
+
+  /conversations/{session_id}/stats:
+    get:
+      tags:
+        - Conversations
+      summary: 获取会话统计
+      description: |
+        获取当前会话的学习统计数据，包括对话轮次、学习时长等。
+        前端用于展示学习进度。
+      operationId: getSessionStats
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 会话 ID
+          example: "sess_abc123xyz"
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionStatsResponse'
+        '404':
+          $ref: '#/components/responses/SessionNotFound'
+
+  /conversations/{session_id}:
+    delete:
+      tags:
+        - Conversations
+      summary: 删除会话
+      description: |
+        删除指定的学习会话。
+        前端在"新学习"功能中使用此接口清空当前对话。
+      operationId: deleteSession
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 会话 ID
+          example: "sess_abc123xyz"
+      responses:
+        '200':
+          description: 删除成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "会话已删除"
+        '404':
+          $ref: '#/components/responses/SessionNotFound'
+
+components:
+  schemas:
+    CreateSessionRequest:
+      type: object
+      required:
+        - student_id
+        - subject
+        - student_age
+      properties:
+        student_id:
+          type: string
+          description: 学生 ID
+          example: "student_12345"
+        subject:
+          type: string
+          description: 学习科目
+          enum: [数学, 语文, 英语]
+          example: "数学"
+        student_age:
+          type: integer
+          description: 学生年龄
+          minimum: 5
+          maximum: 10
+          example: 6
+        topic:
+          type: string
+          description: 学习主题
+          example: "学习伙伴"
+
+    SessionResponse:
+      type: object
+      properties:
+        session_id:
+          type: string
+          description: 会话 ID
+          example: "sess_abc123xyz"
+        student_id:
+          type: string
+          description: 学生 ID
+          example: "student_12345"
+        subject:
+          type: string
+          description: 科目
+          example: "数学"
+        student_age:
+          type: integer
+          description: 学生年龄
+          example: 6
+        created_at:
+          type: string
+          format: date-time
+          description: 创建时间
+          example: "2025-01-13T10:30:00Z"
+        is_valid:
+          type: boolean
+          description: 会话是否有效
+          example: true
+
+    VoiceInputRequest:
+      type: object
+      required:
+        - session_id
+        - transcript
+      properties:
+        session_id:
+          type: string
+          description: 会话 ID
+          example: "sess_abc123xyz"
+        transcript:
+          type: string
+          maxLength: 500
+          description: 语音识别文本
+          example: "7加5等于几"
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: 识别置信度
+          example: 0.92
+
+    TextInputRequest:
+      type: object
+      required:
+        - session_id
+        - content
+      properties:
+        session_id:
+          type: string
+          description: 会话 ID
+          example: "sess_abc123xyz"
+        content:
+          type: string
+          maxLength: 500
+          description: 文字内容
+          example: "3乘以4等于几"
+
+    ConversationResponse:
+      type: object
+      properties:
+        session_id:
+          type: string
+          description: 会话 ID
+          example: "sess_abc123xyz"
+        response:
+          type: string
+          maxLength: 2000
+          description: AI 响应内容
+          example: "试着把7拆成5和几呢？"
+        timestamp:
+          type: string
+          format: date-time
+          description: 响应时间
+          example: "2025-01-13T10:30:15Z"
+        response_type:
+          type: string
+          description: 响应类型
+          enum: [guidance, encouragement, error, question]
+          example: "guidance"
+        is_correct:
+          type: boolean
+          description: 学生是否回答正确
+          example: false
+
+    HistoryResponse:
+      type: object
+      properties:
+        session_id:
+          type: string
+          description: 会话 ID
+          example: "sess_abc123xyz"
+        messages:
+          type: array
+          description: 对话历史
+          items:
+            type: object
+            properties:
+              role:
+                type: string
+                enum: [user, assistant, system]
+                example: "user"
+              content:
+                type: string
+                example: "7加5等于几"
+              timestamp:
+                type: string
+                format: date-time
+                example: "2025-01-13T10:30:00Z"
+        total_count:
+          type: integer
+          description: 总消息数
+          example: 10
+
+    SessionStatsResponse:
+      type: object
+      properties:
+        session_id:
+          type: string
+          description: 会话 ID
+          example: "sess_abc123xyz"
+        student_id:
+          type: string
+          description: 学生 ID
+          example: "student_12345"
+        subject:
+          type: string
+          description: 科目
+          example: "数学"
+        message_count:
+          type: integer
+          description: 对话轮次
+          example: 5
+        duration_seconds:
+          type: integer
+          description: 学习时长（秒）
+          example: 300
+        created_at:
+          type: string
+          format: date-time
+          description: 会话创建时间
+          example: "2025-01-13T10:30:00Z"
+        last_activity:
+          type: string
+          format: date-time
+          description: 最后活动时间
+          example: "2025-01-13T10:35:00Z"
+        is_valid:
+          type: boolean
+          description: 会话是否有效
+          example: true
+
+  responses:
+    BadRequest:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Invalid request parameters"
+
+    SessionNotFound:
+      description: 会话不存在或已过期
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Session not found or expired"
+
+    ValidationError:
+      description: 请求体验证错误
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    loc:
+                      type: array
+                      items:
+                        type: string
+                      example: ["body", "transcript"]
+                    msg:
+                      type: string
+                      example: "field required"
+                    type:
+                      type: string
+                      example: "value_error.missing"

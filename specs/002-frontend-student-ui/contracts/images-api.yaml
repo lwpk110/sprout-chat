@@ -1,0 +1,293 @@
+openapi: 3.0.3
+info:
+  title: 小芽家教 - 图片上传 API (前端对接契约)
+  description: |
+    前端对接后端图片识别和引导式教学的 API 契约规范。
+    包含拍照上传、OCR 识别、引导式反馈等接口。
+  version: 1.0.0
+  contact:
+    name: 小芽家教前端团队
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: 本地开发环境 (通过 Vite proxy 代理)
+  - url: /api
+    description: 相对路径 (生产环境使用 Nginx 反向代理)
+
+tags:
+  - name: Image Upload
+    description: 图片上传和识别
+  - name: Guidance
+    description: 引导式教学反馈
+
+paths:
+  /images/guide:
+    post:
+      tags:
+        - Image Upload
+      summary: 上传图片并获得引导式反馈
+      description: |
+        前端处理用户拍照上传的作业图片。
+        工作流程：
+        1. 前端调用摄像头或从相册选择图片
+        2. 前端使用 browser-image-compression 压缩图片至 < 1MB
+        3. 前端调用此接口上传图片
+        4. 后端进行 OCR 识别和内容分析
+        5. 后端返回引导式教学反馈（不包含直接答案）
+      operationId: uploadImageForGuidance
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadImageRequest'
+            encoding:
+              file:
+                contentType: image/jpeg, image/png, image/webp
+      responses:
+        '200':
+          description: 图片上传成功并返回引导式反馈
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadImageResponse'
+              examples:
+                success_with_guidance:
+                  summary: 识别成功并返回引导
+                  value:
+                    success: true
+                    data:
+                      student_id: "student_12345"
+                      subject: "数学"
+                      response: "我看到这道题是 3 + 5 = ?。你能画图或者用手指算一算吗？"
+                      image_size: 524288
+                      ocr_confidence: 0.95
+                      question_type: "addition"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+          description: |
+            可能的错误情况：
+            - 图片格式不支持
+            - 图片文件过大
+            - 图片内容无法识别（模糊、反光等）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unsupported_format:
+                  summary: 不支持的图片格式
+                  value:
+                    success: false
+                    error: "图片格式不支持，请使用 JPEG、PNG 或 WebP 格式"
+                    error_code: "UNSUPPORTED_FORMAT"
+                image_too_large:
+                  summary: 图片过大
+                  value:
+                    success: false
+                    error: "图片太大，请压缩后重试（最大 5MB）"
+                    error_code: "IMAGE_TOO_LARGE"
+                blur_detected:
+                  summary: 图片模糊无法识别
+                  value:
+                    success: false
+                    error: "照片不清楚，重新拍一张好吗？"
+                    error_code: "BLUR_DETECTED"
+                no_content_found:
+                  summary: 无法识别题目内容
+                  value:
+                    success: false
+                    error: "我看不到题目，可以重新拍一张清晰的吗？"
+                    error_code: "NO_CONTENT_FOUND"
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /images/analyze:
+    post:
+      tags:
+        - Image Upload
+      summary: 分析图片内容（高级）
+      description: |
+        仅分析图片内容，不返回教学反馈。
+        前端可用于图片预览阶段，提示用户是否上传。
+      operationId: analyzeImage
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: 图片文件
+      responses:
+        '200':
+          description: 图片分析成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      detected_content:
+                        type: string
+                        description: 检测到的内容描述
+                        example: "检测到数学题目：3 + 5 = ?"
+                      confidence:
+                        type: number
+                        format: float
+                        minimum: 0
+                        maximum: 1
+                        description: OCR 置信度
+                        example: 0.95
+                      is_clear:
+                        type: boolean
+                        description: 图片是否清晰
+                        example: true
+                      question_type:
+                        type: string
+                        description: 题目类型
+                        example: "addition"
+
+components:
+  schemas:
+    UploadImageRequest:
+      type: object
+      required:
+        - file
+        - student_id
+        - student_age
+        - subject
+      properties:
+        file:
+          type: string
+          format: binary
+          description: |
+            图片文件（前端压缩后）。
+            支持格式：JPEG, PNG, WebP
+            最大文件大小：5MB
+            推荐分辨率：1920x1080 或更高
+        student_id:
+          type: string
+          description: 学生 ID
+          example: "student_12345"
+        student_age:
+          type: integer
+          description: 学生年龄
+          minimum: 5
+          maximum: 10
+          example: 6
+        subject:
+          type: string
+          description: 学习科目
+          enum: [数学, 语文, 英语]
+          example: "数学"
+
+    UploadImageResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: 请求是否成功
+          example: true
+        data:
+          type: object
+          properties:
+            student_id:
+              type: string
+              example: "student_12345"
+            subject:
+              type: string
+              example: "数学"
+            response:
+              type: string
+              maxLength: 2000
+              description: |
+                AI 的引导式教学响应。
+                注意：响应中必须包含引导性问题，不能包含直接答案。
+              example: "我看到这道题是 3 + 5 = ?。你能画图或者用手指算一算吗？"
+            image_size:
+              type: integer
+              description: 图片大小（字节）
+              example: 524288
+            ocr_confidence:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+              description: OCR 识别置信度
+              example: 0.95
+            question_type:
+              type: string
+              description: 题目类型
+              enum: [addition, subtraction, multiplication, division, word_problem, unknown]
+              example: "addition"
+            recognized_text:
+              type: string
+              description: OCR 识别的文本
+              example: "3 + 5 = ?"
+            guidance_type:
+              type: string
+              description: 引导类型
+              enum: [clarify, hint, break_down, visualize, check_work, alternative_method, encourage]
+              example: "hint"
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          description: |
+            用户友好的错误提示（儿童易懂语言）
+          example: "照片不清楚，重新拍一张好吗？"
+        error_code:
+          type: string
+          description: |
+            错误代码，供前端做特殊处理
+          enum:
+            - UNSUPPORTED_FORMAT
+            - IMAGE_TOO_LARGE
+            - BLUR_DETECTED
+            - NO_CONTENT_FOUND
+            - OCR_FAILED
+            - AI_SERVICE_UNAVAILABLE
+          example: "BLUR_DETECTED"
+        retry_suggested:
+          type: boolean
+          description: 是否建议用户重试
+          example: true
+
+  responses:
+    BadRequest:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: "请求参数错误"
+            error_code: "BAD_REQUEST"
+
+    ValidationError:
+      description: 请求体验证错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: "缺少必填字段"
+            error_code: "VALIDATION_ERROR"
