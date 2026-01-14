@@ -101,6 +101,18 @@ QUICKSTART.md
 test_image_detailed.py
 diagnose_*.py
 
-# .claude directory (except skills)
-.claude/
+# .claude directory (precise ignore)
+# Ignore cache and temporary files only
+.claude/cache/
+.claude/tmp/
+.claude/*.local.md
+.claude/**/*.local.md
+.claude/session*/
+.claude/context*/
+
+# But track all important configs
+!.claude/
+!.claude/agents/
+!.claude/commands/
 !.claude/skills/
+!.claude/projects/
