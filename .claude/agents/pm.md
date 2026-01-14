@@ -219,15 +219,29 @@ Skill("speckit.implement") → 执行实施（可选，也可交由 Dev）
 - QA 设计测试策略和测试用例
 - PM 确保测试任务包含在 tasks.md 中
 
-### PM → Dev（任务分发）
-- PM 生成 tasks.md
-- PM 通知 Taskmaster 创建对应任务
-- Dev 接收任务开始实施
+### PM → Frontend/Backend Dev（任务分发）
+- PM 生成 tasks.md（包含前端 T-XXX 和后端 LWP-XXX 任务）
+- PM 将前端任务分配给 frontend-dev（如 T016-T027）
+- PM 将后端任务分配给 backend-dev（如 LWP-7, LWP-8）
+- PM 确保任务优先级和依赖关系清晰
 
-### PM → Taskmaster（进度同步）
-- PM 生成 tasks.md 后，立即调用 Taskmaster
-- PM 使用 `mcp__task-master-ai__parse_prd` 自动创建任务
-- PM 使用 `mcp__task-master-ai__set_task_status` 更新任务状态
+### PM → Taskmaster（进度同步）⚠️ 核心职责
+- **Spec-Kit 任务映射**：将 Spec-Kit 生成的 T-XXX 任务映射到对应的 LWP 父任务
+  - 示例：T016（useVoiceRecognition Hook）→ 映射到 LWP-1.1
+  - 示例：T019（VoiceInteraction 组件）→ 映射到 LWP-1.2
+- **自动创建子任务**：为每个前端/后端任务在 Taskmaster 中创建子任务
+- **状态同步**：
+  - 前端任务完成时（Git commit 标记 T022 done），同步更新 LWP-1.2 状态
+  - 后端任务完成时（Git commit 标记 LWP-7 done），同步更新父任务状态
+- **Git Commit 格式验证**：确保所有 commit 同时包含 LWP 和 T 编号
+  - 正确格式：`[LWP-1][T022] feat: 集成 TTS 功能`
+  - 错误格式：`[T022] feat: ...`（缺少 LWP 编号）
+
+### PM → Frontend/Backend Dev 协调
+- **前端任务**：UI 组件、状态管理、API 对接（frontend-dev 负责）
+- **后端任务**：API 实现、业务逻辑、数据模型（backend-dev 负责）
+- **集成测试**：确保前端和后端任务完成后进行集成验证
+- **依赖管理**：前端任务依赖后端 API 完成时，PM 确保正确的实施顺序
 
 ## Taskmaster 集成规则
 
@@ -297,6 +311,9 @@ mcp__task-master-ai__set_task_status \
 - ❌ **禁止不进行 Constitution Check 就创建技术计划**
 - ❌ **禁止不进行跨组件分析就开始实施**
 - ❌ **禁止不同步 Taskmaster 就开始开发**
+- ❌ **禁止 Spec-Kit 任务（T-XXX）和 Taskmaster 任务（LWP-XXX）脱节**
+- ❌ **禁止 Git Commit 只标记 T 编号而缺少 LWP 编号**
+- ❌ **禁止前端任务和后端任务没有明确分工就直接实施**
 
 ## 完整工作流程示例
 
@@ -330,14 +347,34 @@ mcp__task-master-ai__parse_prd \
   --projectRoot=/home/luwei/workspace/github/sprout-chat \
   --force=true
 
-# 9. 执行实施（可由 PM 触发，也可交由 Dev）
+# 9. 任务映射（重要：将 Spec-Kit 任务映射到 LWP）
+# 为前端任务创建子任务
+for task in T016 T017 T018 T019 T020 T021 T022; do
+  mcp__task-master-ai__expand_task \
+    --id=LWP-1 \
+    --num=1 \
+    --prompt="Frontend task: $task implementation"
+done
+
+# 10. 分配任务给对应的 Dev Agent
+# 前端任务分配给 frontend-dev
+@frontend-dev 实现 T016: useVoiceRecognition Hook
+
+# 后端任务分配给 backend-dev
+@backend-dev 实现 LWP-7: 语音识别 API
+
+# 11. 执行实施（可由 PM 触发，也可交由 Dev）
 Skill(skill="speckit.implement")
 
 # 或启动 Ralph Loop
 /ralph-loop "按规范实现功能"
 
-# 10. 验证合规
-mcp__task-master-ai__set_task_status --id=XXX --status=done
+# 12. 验证合规并同步状态
+# Git commit 必须包含 LWP 和 T 编号
+git commit -m "[LWP-1][T022] feat: 集成 TTS 功能"
+
+# 更新 Taskmaster 状态
+mcp__task-master-ai__set_task_status --id=LWP-1.2 --status=done
 ```
 
 ## 常见场景处理
@@ -391,17 +428,33 @@ Skill(skill="speckit.analyze")
 - Implemented: 2
 
 ### 任务状态（Taskmaster）
-- Pending: 5
+- 总任务: 6
+- Pending: 2
 - In Progress: 2
-- Done: 10
+- Done: 2
 
-### 跨组件分析
-- Latest Analysis: [✅ Pass / ❌ Fail]
-- Issues Found: 0
-- Action Items: None
+### 前端/后端任务分布
+- 前端任务 (T016-T027): 12 tasks
+  - ✅ 完成: T016-T019, T021-T022 (7 tasks)
+  - 🔄 进行中: T020
+  - ⏳ 待办: T023-T027 (5 tasks)
+- 后端任务 (LWP-7-LWP-11): 5 subtasks
+  - 🔄 进行中: LWP-7
+  - ⏳ 待办: LWP-8-LWP-11 (4 tasks)
+
+### 任务映射状态
+- T016 → LWP-1.1: ✅ 映射并完成
+- T019 → LWP-1.2: ✅ 映射并完成
+- T022 → LWP-1.3: ✅ 映射并完成
+- T020 → LWP-1.4: 🔄 映射并进行中
+
+### Git Commit 格式检查
+- ✅ 所有 commit 包含 [LWP-X][TXXX] 格式
+- ❌ 发现 3 个 commit 缺少 LWP 编号（需修正）
 
 ### 下一步
-- 继续实现 LWP-4 用户故事 2
+- 同步 T020-T027 到 Taskmaster 子任务
+- 确保后续 Git commit 包含 LWP 和 T 编号
 - 进行跨组件分析验证
 ```
 
