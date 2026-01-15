@@ -312,6 +312,7 @@ git commit -m "[LWP-X] refactor: xxx (Refactor)"
 | 文档 | 描述 |
 |------|------|
 | [Git 工作流](./technical/git-workflow.md) | 双仓库同步配置 |
+| [Gitee 认证配置](./technical/gitee-auth-setup.md) | Gitee SSH/令牌认证指南 |
 | [产品需求文档](./specifications/prd.md) | PRD 产品需求 |
 | [教师人格规范](./specifications/teacher-spec.md) | 小芽人格定义 |
 | [AI 配置](./technical/ai-config.md) | AI 模型配置 |
