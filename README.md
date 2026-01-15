@@ -253,13 +253,51 @@ git commit -m "[LWP-X] refactor: xxx (Refactor)"
 
 ## 📖 文档
 
+### 核心文档
+
 | 文档 | 描述 |
 |------|------|
-| [PRD](./docs/PRD.md) | 产品需求文档 |
-| [教师人格规范](./docs/teacher-spec.md) | 小芽人格定义 |
-| [数据库设计](./docs/database_schema.md) | 数据表结构 |
-| [项目完成报告](./PROJECT_COMPLETION_REPORT.md) | MVP 开发总结 |
-| [开发协议](./docs/development-guide.md) | TDD 开发流程 |
+| [开发协议](./development/development-guide.md) | TDD 开发流程规范 |
+| [项目宪章](./.specify/memory/constitution.md) | 核心价值观和原则 |
+
+### 架构决策 (ADR)
+
+| 文档 | 描述 |
+|------|------|
+| [ADR-002: Taskmaster 本地模式](./adr/adr-002-taskmaster-local.md) | 采用 Taskmaster 本地模式 |
+| [ADR-001: Linear 迁移评估](./adr/adr-001-linear-eval.md) | Linear 迁移可行性分析 |
+
+### 开发指南
+
+| 文档 | 描述 |
+|------|------|
+| [Taskmaster 最佳实践](./development/taskmaster-best-practices.md) | 任务管理工具使用指南 |
+| [Ralph Loop 指南](./RALPH_LOOP_GUIDE.md) | 迭代开发快速开始 |
+| [Ralph Loop 配置](./RALPH_LOOP_SETUP.md) | 配置说明和使用流程 |
+
+### 技术文档
+
+| 文档 | 描述 |
+|------|------|
+| [产品需求文档](./specifications/prd.md) | PRD 产品需求 |
+| [教师人格规范](./specifications/teacher-spec.md) | 小芽人格定义 |
+| [AI 配置](./technical/ai-config.md) | AI 模型配置 |
+| [API 文档](./technical/api.md) | API 接口规范 |
+| [数据库设计](./technical/database-schema.md) | 数据表结构 |
+| [集成文档](./technical/integrations.md) | 第三方集成 |
+
+### 项目记忆
+
+| 文档 | 描述 |
+|------|------|
+| [CLAUDE.md](./CLAUDE.md) | 项目记忆中枢 |
+| [PROMPT.md](./PROMPT.md) | 当前迭代任务 |
+
+### 完成报告
+
+| 文档 | 描述 |
+|------|------|
+| [MVP 完成报告](./reports/MVP_DELIVERY.md) | MVP 开发总结 |
 
 ## 🎯 路线图
 
