@@ -685,10 +685,7 @@
     "metadata": {
       "source": "speckit",
       "synced_at": "2026-01-15T13:00:00Z",
-      "speckit_file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md",
-      "created": "2026-01-15T08:09:43.237Z",
-      "description": "Tasks for learning-management context",
-      "updated": "2026-01-15T08:09:43.237Z"
+      "speckit_file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
     }
   }
 }
