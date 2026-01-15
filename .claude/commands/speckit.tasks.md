@@ -60,6 +60,64 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Suggested MVP scope (typically just User Story 1)
    - Format validation: Confirm ALL tasks follow the checklist format (checkbox, ID, labels, file paths)
 
+6. **🆖 Auto-sync to Task-Master** (CRITICAL INTEGRATION):
+   - After tasks.md is successfully generated, automatically import tasks to Task-Master
+   - Use the task-manager skill to import tasks
+   - Tag strategy: Use spec folder name as Task-Master tag (e.g., "001-learning-management" → tag="learning-management")
+   - Task ID mapping: Map T001 → LWP-2.2-T001 (using project ID from context)
+   - Verify import success and report results
+
+   **Implementation**:
+   ```python
+   # Extract spec ID from FEATURE_DIR
+   spec_id = os.path.basename(FEATURE_DIR)  # e.g., "001-learning-management"
+
+   # Generate tag name (remove number prefix)
+   tag = spec_id.split("-", 1)[1] if "-" in spec_id else spec_id  # e.g., "learning-management"
+
+   # Call task-manager skill to import
+   Skill(
+       skill="task-manager",
+       args=f"import {spec_id} --tag={tag} --project-root={REPO_ROOT}"
+   )
+
+   # Verify import
+   result = mcp__task-master-ai__get_tasks({
+       "projectRoot": REPO_ROOT,
+       "tag": tag,
+       "withSubtasks": false
+   })
+
+   # Report import results
+   print(f"✅ Successfully imported {len(result['data']['tasks'])} tasks to Task-Master")
+   print(f"   Tag: {tag}")
+   print(f"   Spec ID: {spec_id}")
+   ```
+
+   **Error Handling**:
+   - If Task-Master MCP is unavailable: Warn user but don't fail (tasks.md is still created)
+   - If import fails: Provide clear error message and manual import instructions
+   - If tag already exists: Ask user if they want to sync (update existing) or create new tag
+
+   **Output Format**:
+   ```
+   ✅ Tasks.md generated: /home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md
+   📊 Summary:
+      - Total tasks: 30
+      - User stories: 4
+      - Parallel opportunities: 8 tasks can run in parallel
+
+   🆖 Auto-syncing to Task-Master...
+   ✅ Successfully imported 30 tasks to Task-Master
+      - Tag: learning-management
+      - Task IDs: LWP-2.2-T001 through LWP-2.2-T030
+
+   💡 Next steps:
+      1. Review tasks.md: cat specs/001-learning-management/tasks.md
+      2. Claim tasks: /task-manager list --status=pending --unclaimed --tag=learning-management
+      3. Start implementation: /task-manager claim LWP-2.2-T001 --agent=<your-agent-id>
+   ```
+
 Context for task generation: $ARGUMENTS
 
 The tasks.md should be immediately executable - each task must be specific enough that an LLM can complete it without additional context.

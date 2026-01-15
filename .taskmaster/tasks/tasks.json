@@ -1,59 +1,694 @@
 {
-  "master": {
+  "learning-management": {
     "tasks": [
       {
-        "id": 1,
-        "title": "[P0] 配置后端基础环境 (FastAPI)",
-        "description": "创建 Python 虚拟环境，安装 FastAPI、uvicorn 等必要依赖，设置基础项目结构",
-        "status": "pending",
-        "priority": "critical",
-        "tags": ["backend", "setup"],
-        "dependencies": [],
-        "created_at": "2026-01-08T03:38:00.000Z",
-        "updated_at": "2026-01-08T03:38:00.000Z",
-        "subtasks": []
-      },
-      {
-        "id": 2,
-        "title": "[P0] 实现小芽核心对话引擎 (engine.py)",
-        "description": "实现小芽人格的对话管理引擎，包括 Prompt 模板、对话状态管理、引导式教学逻辑",
-        "status": "pending",
-        "priority": "critical",
-        "tags": ["backend", "ai", "core"],
-        "dependencies": [1],
-        "created_at": "2026-01-08T03:38:00.000Z",
-        "updated_at": "2026-01-08T03:38:00.000Z",
-        "subtasks": []
-      },
-      {
-        "id": 3,
-        "title": "[P1] 编写影子测试 (Shadow Test) 验证教学质量",
-        "description": "创建自动化测试框架，模拟教学场景验证小芽的教学效果和人格一致性",
+        "id": "LWP-2.2-T001",
+        "title": "配置 Claude API 集成环境",
+        "description": "配置 Claude API 集成环境",
         "status": "pending",
         "priority": "high",
-        "tags": ["testing", "quality"],
-        "dependencies": [2],
-        "created_at": "2026-01-08T03:38:00.000Z",
-        "updated_at": "2026-01-08T03:38:00.000Z",
-        "subtasks": []
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T001",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T001",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
       },
       {
-        "id": 4,
-        "title": "[P2] 搭建前端极简界面",
-        "description": "创建基础的 React + Tailwind 前端界面，包括语音输入、对话展示和小芽形象展示",
+        "id": "LWP-2.2-T002",
+        "title": "安装 Python 依赖包",
+        "description": "安装 Python 依赖包",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T002",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T002",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T003",
+        "title": "创建数据加密服务（儿童数据安全）",
+        "description": "创建数据加密服务（儿童数据安全）",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T003",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T003",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T004",
+        "title": "[P] 创建学习记录扩展模型（LearningRecord）",
+        "description": "[P] 创建学习记录扩展模型（LearningRecord）",
         "status": "pending",
         "priority": "medium",
-        "tags": ["frontend", "ui"],
-        "dependencies": [1],
-        "created_at": "2026-01-08T03:38:00.000Z",
-        "updated_at": "2026-01-08T03:38:00.000Z",
-        "subtasks": []
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T004",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T004",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T005",
+        "title": "[P] 创建错题记录模型（WrongAnswerRecord）",
+        "description": "[P] 创建错题记录模型（WrongAnswerRecord）",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T005",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T005",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T006",
+        "title": "[P] 创建知识点模型（KnowledgePoint）",
+        "description": "[P] 创建知识点模型（KnowledgePoint）",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T006",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T006",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T007",
+        "title": "[P] 创建知识点掌握模型（KnowledgeMastery）",
+        "description": "[P] 创建知识点掌握模型（KnowledgeMastery）",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T007",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T007",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T008",
+        "title": "[P] 创建知识点依赖关系模型（KnowledgePointDependency）",
+        "description": "[P] 创建知识点依赖关系模型（KnowledgePointDependency）",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T008",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T008",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T009",
+        "title": "创建数据库迁移脚本",
+        "description": "创建数据库迁移脚本",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T009",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T009",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T010",
+        "title": "初始化知识点数据",
+        "description": "初始化知识点数据",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T010",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T010",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T011",
+        "title": "[US1] 编写学习记录 API 测试（红灯）",
+        "description": "[US1] 编写学习记录 API 测试（红灯）",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T011",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T011",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T012",
+        "title": "[US1] 扩展学习记录 API 端点",
+        "description": "[US1] 扩展学习记录 API 端点",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T012",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T012",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T013",
+        "title": "[US1] 实现学习追踪服务",
+        "description": "[US1] 实现学习追踪服务",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T013",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T013",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T014",
+        "title": "[US1] 编写学习记录集成测试",
+        "description": "[US1] 编写学习记录集成测试",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T014",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T014",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T021",
+        "title": "[US2] 编写苏格拉底教学服务测试（红灯）",
+        "description": "[US2] 编写苏格拉底教学服务测试（红灯）",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T021",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T021",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T022",
+        "title": "[US2] 实现错误答案分类器",
+        "description": "[US2] 实现错误答案分类器",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T022",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T022",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T023",
+        "title": "[US2] 实现响应验证系统",
+        "description": "[US2] 实现响应验证系统",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T023",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T023",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T024",
+        "title": "[US2] 集成 Claude API 生成引导式响应",
+        "description": "[US2] 集成 Claude API 生成引导式响应",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T024",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T024",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T025",
+        "title": "[US2] 实现引导教学 API 端点",
+        "description": "[US2] 实现引导教学 API 端点",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T025",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T025",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T026",
+        "title": "[US2] 编写引导教学集成测试",
+        "description": "[US2] 编写引导教学集成测试",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T026",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T026",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T031",
+        "title": "[US3] 编写错题本 API 测试（红灯）",
+        "description": "[US3] 编写错题本 API 测试（红灯）",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T031",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T031",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T032",
+        "title": "[US3] 实现练习推荐服务",
+        "description": "[US3] 实现练习推荐服务",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T032",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T032",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T033",
+        "title": "[US3] 实现错题本 API 端点",
+        "description": "[US3] 实现错题本 API 端点",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T033",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T033",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T034",
+        "title": "[US3] 编写错题本集成测试",
+        "description": "[US3] 编写错题本集成测试",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T034",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T034",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T041",
+        "title": "[US4] 编写知识点图谱 API 测试（红灯）",
+        "description": "[US4] 编写知识点图谱 API 测试（红灯）",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T041",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T041",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T042",
+        "title": "[US4] 实现知识点追踪服务",
+        "description": "[US4] 实现知识点追踪服务",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T042",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T042",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T043",
+        "title": "[US4] 实现知识点图谱 API 端点",
+        "description": "[US4] 实现知识点图谱 API 端点",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T043",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T043",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T044",
+        "title": "[US4] 编写知识点图谱集成测试",
+        "description": "[US4] 编写知识点图谱集成测试",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T044",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T044",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T051",
+        "title": "[P] 编写 API 契约测试",
+        "description": "[P] 编写 API 契约测试",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T051",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T051",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T052",
+        "title": "[P] 性能优化（索引和查询）",
+        "description": "[P] 性能优化（索引和查询）",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T052",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T052",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T053",
+        "title": "[P] 验证与现有认证系统的集成",
+        "description": "[P] 验证与现有认证系统的集成",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T053",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T053",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T054",
+        "title": "[P] 生成测试覆盖率报告",
+        "description": "[P] 生成测试覆盖率报告",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T054",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T054",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T055",
+        "title": "完善 API 文档",
+        "description": "完善 API 文档",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T055",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T055",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
+      },
+      {
+        "id": "LWP-2.2-T056",
+        "title": "最终端到端测试",
+        "description": "最终端到端测试",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "**Source**: Spec-Kit tasks.md\n**Original ID**: T056",
+        "testStrategy": "TDD 绿灯阶段：运行 pytest 确认测试通过",
+        "tags": [
+          "speckit",
+          "tdd"
+        ],
+        "subtasks": [],
+        "metadata": {
+          "source": "speckit",
+          "original_id": "T056",
+          "file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md"
+        }
       }
     ],
     "metadata": {
-      "created": "2026-01-08T03:37:40.372Z",
-      "updated": "2026-01-08T11:38:00.000Z",
-      "description": "Tasks for master context"
+      "source": "speckit",
+      "synced_at": "2026-01-15T13:00:00Z",
+      "speckit_file": "/home/luwei/workspace/github/sprout-chat/specs/001-learning-management/tasks.md",
+      "created": "2026-01-15T08:09:43.237Z",
+      "description": "Tasks for learning-management context",
+      "updated": "2026-01-15T08:09:43.237Z"
     }
   }
 }

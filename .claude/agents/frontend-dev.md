@@ -6,6 +6,7 @@ skills:
   - git-commit
   - sprout-persona
   - gatekeeper
+  - using-git-worktrees
 ---
 
 # Frontend Engineer 角色定义

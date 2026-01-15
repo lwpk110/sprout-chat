@@ -1,0 +1,161 @@
+title,body,labels
+"LWP-2.2-T001: 配置 Claude API 集成环境","**描述**: 在 backend/.env 添加 AI_PROVIDER=openai, AI_MODEL=glm-4.7, OPENAI_API_KEY, OPENAI_BASE_URL=https://open.bigmodel.cn/api/paas/v4/
+
+**详情**: 测试 Claude API 连接：创建简单的测试脚本验证 API 调用。使用智谱 GLM-4 模型作为 AI Provider。
+
+**测试策略**: 运行测试脚本验证 API 连接
+
+**优先级**: high
+**状态**: pending","learning-management,high,setup,ai"
+"LWP-2.2-T002: 安装 Python 依赖包","**描述**: 添加 anthropic (Claude SDK) 和 cryptography (AES-256 加密) 到 requirements.txt
+
+**详情**: 运行 pip install -r requirements.txt 安装依赖
+
+**测试策略**: 验证所有包导入成功
+
+**优先级**: high
+**状态**: pending","learning-management,high,setup"
+"LWP-2.2-T003: 创建数据加密服务（儿童数据安全）","**描述**: 实现 AES-256 加密服务保护儿童个人数据，符合 COPPA 合规要求
+
+**详情**: 在 backend/app/utils/encryption.py 实现加密类
+
+**测试策略**: 编写加密/解密单元测试
+
+**优先级**: high
+**状态**: pending","learning-management,high"
+"LWP-2.2-T004: 创建学习记录扩展模型（LearningRecord）","**描述**: 扩展学习记录模型，包含 question_content, student_answer, is_correct, time_spent 字段
+
+**详情**: 在 backend/app/models/learning.py 创建模型
+
+**测试策略**: 测试模型创建和数据持久化
+
+**优先级**: high
+**状态**: pending","learning-management,high"
+"LWP-2.2-T005: 创建错题记录模型（WrongAnswerRecord）","**描述**: 创建错题记录模型，追踪学生错误答案
+
+**详情**: 包含学生答案、正确答案、错误原因分析
+
+**测试策略**: 测试错题记录功能
+
+**优先级**: high
+**状态**: pending","learning-management,high"
+"LWP-2.2-T006: 创建知识点模型（KnowledgePoint）","**描述**: 创建知识点模型，管理课程知识体系
+
+**详情**: 包含知识点名称、描述、难度级别、所属科目
+
+**测试策略**: 测试知识点 CRUD 操作
+
+**优先级**: high
+**状态**: pending","learning-management,high"
+"LWP-2.2-T007: 创建知识点掌握模型（KnowledgeMastery）","**描述**: 追踪学生对各知识点的掌握程度
+
+**详情**: 关联学生和知识点，记录掌握级别
+
+**测试策略**: 测试掌握度更新逻辑
+
+**优先级**: medium
+**状态**: pending","learning-management,medium"
+"LWP-2.2-T008: 创建知识点依赖关系模型（KnowledgePointDependency）","**描述**: 定义知识点之间的先修关系
+
+**详情**: 记录前置知识点，构建知识图谱
+
+**测试策略**: 测试依赖关系解析
+
+**优先级**: medium
+**状态**: pending","learning-management,medium"
+"LWP-2.2-T009: 创建数据库迁移脚本","**描述**: 使用 Alembic 创建数据库迁移脚本
+
+**详情**: 支持 SQLite（开发）和 PostgreSQL（生产）
+
+**测试策略**: 测试迁移升级和降级
+
+**优先级**: high
+**状态**: pending","learning-management,high"
+"LWP-2.2-T010: 初始化知识点数据","**描述**: 为一年级数学课程初始化知识点数据
+
+**详情**: 导入数学知识点：加减法、认识图形、测量等
+
+**测试策略**: 验证数据导入成功
+
+**优先级**: medium
+**状态**: pending","learning-management,medium"
+"LWP-2.2-T011: 编写学习记录 API 测试（红灯）","**描述**: TDD 红灯阶段：编写学习记录 API 的失败测试
+
+**详情**: 测试 POST /api/v1/learning/records 创建记录
+
+**测试策略**: 运行 pytest 确认测试失败
+
+**优先级**: high
+**状态**: pending","learning-management,high"
+"LWP-2.2-T012: 扩展学习记录 API 端点","**描述**: 实现学习记录 CRUD API 端点
+
+**详情**: POST /api/v1/learning/records, GET /api/v1/learning/records/{id}
+
+**测试策略**: 运行测试确认通过
+
+**优先级**: high
+**状态**: pending","learning-management,high"
+"LWP-2.2-T013: 实现学习追踪服务","**描述**: 创建学习追踪服务，计算学习进度和统计
+
+**详情**: 计算学习时间、正确率、知识点覆盖度
+
+**测试策略**: 测试服务计算逻辑
+
+**优先级**: high
+**状态**: pending","learning-management,high"
+"LWP-2.2-T014: 编写学习记录集成测试","**描述**: 端到端测试学习记录 API
+
+**详情**: 测试完整的创建-查询-更新流程
+
+**测试策略**: 集成测试覆盖所有场景
+
+**优先级**: high
+**状态**: pending","learning-management,high"
+"LWP-2.2-T021: 编写苏格拉底教学服务测试（红灯）","**描述**: TDD 红灯阶段：编写苏格拉底教学服务的失败测试
+
+**详情**: 测试引导式响应生成，验证不给直接答案
+
+**测试策略**: 运行 pytest 确认测试失败
+
+**优先级**: high
+**状态**: pending","learning-management,high,ai"
+"LWP-2.2-T022: 实现错误答案分类器","**描述**: 创建错误答案分类器，识别学生错误类型
+
+**详情**: 分类：计算错误、概念错误、粗心错误
+
+**测试策略**: 测试分类器准确性
+
+**优先级**: high
+**状态**: pending","learning-management,high,ai"
+"LWP-2.2-T023: 实现响应验证系统","**描述**: 验证 AI 响应是否符合苏格拉底教学法
+
+**详情**: 检查响应包含引导性问题而非直接答案
+
+**测试策略**: 测试验证逻辑
+
+**优先级**: high
+**状态**: pending","learning-management,high"
+"LWP-2.2-T024: 集成 Claude API 生成引导式响应","**描述**: 使用 Claude API 生成苏格拉底式引导响应
+
+**详情**: 设计 Prompt 模板，调用 Claude API
+
+**测试策略**: 测试响应质量和引导效果
+
+**优先级**: high
+**状态**: pending","learning-management,high,ai"
+"LWP-2.2-T025: 实现引导教学 API 端点","**描述**: POST /api/v1/teaching/guide 提供引导式教学
+
+**详情**: 接收学生答案，返回引导式问题
+
+**测试策略**: 测试 API 端点
+
+**优先级**: high
+**状态**: pending","learning-management,high"
+"LWP-2.2-T026: 编写引导教学集成测试","**描述**: 端到端测试引导教学流程
+
+**详情**: 测试完整的学生提问-引导响应流程
+
+**测试策略**: 集成测试
+
+**优先级**: high
+**状态**: pending","learning-management,high"

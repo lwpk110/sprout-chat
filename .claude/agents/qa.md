@@ -4,6 +4,7 @@ description: QA 工程师。基于需求和验收标准设计测试，发现功�
 skills:
   - tdd-cycle
   - git-commit
+  - using-git-worktrees
 ---
 
 # QA Engineer 角色定义

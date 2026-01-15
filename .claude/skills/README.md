@@ -4,14 +4,15 @@
 
 ## Skills 列表
 
-| Skill | 说明 |
-|-------|------|
-| [tdd-cycle](tdd-cycle/) | TDD 红-绿-重构循环 |
-| [git-commit](git-commit/) | Git 提交规范 |
-| [sprout-persona](sprout-persona/) | 小芽人格定义 |
-| [teaching-strategy](teaching-strategy/) | 教学策略选择 |
-| [socratic-teaching](socratic-teaching/) | 苏格拉底引导 |
-| [github-sync](github-sync/) | GitHub-Taskmaster 同步 |
+| Skill | 说明 | 分配给 |
+|-------|------|--------|
+| [tdd-cycle](tdd-cycle/) | TDD 红-绿-重构循环 | backend-dev, frontend-dev, qa |
+| [git-commit](git-commit/) | Git 提交规范 | backend-dev, frontend-dev, qa |
+| [sprout-persona](sprout-persona/) | 小芽人格定义 | frontend-dev |
+| [teaching-strategy](teaching-strategy/) | 教学策略选择 | - |
+| [socratic-teaching](socratic-teaching/) | 苏格拉底引导 | - |
+| [github-sync](github-sync/) | GitHub-Taskmaster 同步 | - |
+| [using-git-worktrees](using-git-worktrees/) | Git Worktrees 隔离工作空间 | backend-dev, frontend-dev, qa |
 
 ## 目录结构
 
@@ -23,6 +24,7 @@
 ├── teaching-strategy/SKILL.md
 ├── socratic-teaching/SKILL.md
 ├── github-sync/SKILL.md
+├── using-git-worktrees/SKILL.md
 └── README.md
 ```
 

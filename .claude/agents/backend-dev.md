@@ -5,6 +5,7 @@ skills:
   - tdd-cycle
   - git-commit
   - gatekeeper
+  - using-git-worktrees
 ---
 
 # Backend Engineer 角色定义
