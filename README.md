@@ -7,7 +7,32 @@
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
 </p>
 
+<p align="center">
+  <a href="https://github.com/lwpk110/sprout-chat">
+    <img src="https://img.shields.io/badge/GitHub-lwpk110%2Fsprout--chat-blue.svg" alt="GitHub">
+  </a>
+  <a href="https://gitee.com/steven_lu/sprout-chat">
+    <img src="https://img.shields.io/badge/Gitee-steven_lu%2Fsprout--chat-red.svg" alt="Gitee">
+  </a>
+</p>
+
 > 面向一年级学生的 AI-First 个性化家教助手，通过语音拍照交互和引导式教学，帮助学生在快乐中学习成长。
+
+**仓库镜像**：
+- 🌐 **GitHub**: [https://github.com/lwpk110/sprout-chat](https://github.com/lwpk110/sprout-chat)
+- 🇨🇳 **Gitee**: [https://gitee.com/steven_lu/sprout-chat](https://gitee.com/steven_lu/sprout-chat)
+
+> 💡 两个仓库保持同步，代码会同时推送到 GitHub 和 Gitee。
+
+**推送方式**：
+```bash
+# 方式1：一键推送到所有仓库（推荐）
+git push-all
+
+# 方式2：分别推送
+git push origin main   # 推送到 GitHub
+git push gitee main    # 推送到 Gitee
+```
 
 ## ✨ 产品特色
 
@@ -28,8 +53,15 @@
 
 ### 1. 克隆项目
 
+**从 GitHub 克隆（推荐）**:
 ```bash
 git clone https://github.com/lwpk110/sprout-chat.git
+cd sprout-chat
+```
+
+**从 Gitee 克隆（国内加速）**:
+```bash
+git clone https://gitee.com/steven_lu/sprout-chat.git
 cd sprout-chat
 ```
 
@@ -279,6 +311,7 @@ git commit -m "[LWP-X] refactor: xxx (Refactor)"
 
 | 文档 | 描述 |
 |------|------|
+| [Git 工作流](./technical/git-workflow.md) | 双仓库同步配置 |
 | [产品需求文档](./specifications/prd.md) | PRD 产品需求 |
 | [教师人格规范](./specifications/teacher-spec.md) | 小芽人格定义 |
 | [AI 配置](./technical/ai-config.md) | AI 模型配置 |
@@ -321,11 +354,13 @@ git commit -m "[LWP-X] refactor: xxx (Refactor)"
 
 ## 🤝 贡献
 
-1. Fork 本仓库
+1. Fork 本仓库（GitHub 或 Gitee）
 2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
 3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 开启 Pull Request
+
+**注意**：本项目的两个仓库（GitHub 和 Gitee）保持同步，您可以在任一平台提交 PR。
 
 ## 📄 许可证
 
