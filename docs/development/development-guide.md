@@ -574,23 +574,27 @@ jobs:
 
 ### 8.1 工具概述
 
-项目提供了一套完整的自动化任务管理工具链，实现 Spec-Kit → Taskmaster → Hamster 的自动化同步和可视化管理。
+项目采用 **Taskmaster 本地模式** 作为任务管理系统，通过 Git 实现分布式协作。
 
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│  Spec-Kit   │───▶│ Taskmaster  │───▶│   Hamster   │
-│ (Markdown)  │    │   (JSON)    │    │  (Remote)   │
+│  Spec-Kit   │───▶│ Taskmaster  │───▶│     Git     │
+│ (Markdown)  │    │   (JSON)    │    │  (版本控制)  │
 └─────────────┘    └─────────────┘    └─────────────┘
        │                   │                   │
-       │                   │                   ▼
-       │                   │            tryhamster.com
-       │                   │                   │
        ▼                   ▼                   ▼
-  tasks.md          tasks.json          任务管理平台
+  tasks.md          tasks.json          GitHub / GitLab
+  (人类可读)        (机器可读)           (分布式协作)
        │                   │                   │
-       └─────────自动同步────┴─────────自动同步──┘
-                   监听模式              推送模式
+       └─────────自动同步────┴─────────Git Push──┘
+                   监听模式              自然协作
 ```
+
+**核心优势**:
+- ✅ 本地优先（符合项目宪章）
+- ✅ Git 提供天然的版本控制和协作
+- ✅ 简化工具链（减少维护成本）
+- ✅ 更快的同步速度（毫秒级）
 
 ### 8.2 自动同步工具
 
@@ -640,53 +644,80 @@ tail -f /tmp/auto-sync-to-taskmaster.log
 kill $(cat /tmp/auto-sync-to-taskmaster.pid)
 ```
 
-#### 8.2.2 Taskmaster → Hamster 同步
+#### 8.2.2 Git 协作模式
 
-**脚本**: `scripts/auto-sync-to-hamster.py`
-
-**功能**:
-- 监听 `tasks.json` 变化
-- 自动推送到 Hamster（使用 `task-master add-task`）
-- 批处理：每批 5 个任务，避免速率限制
-- 任务已存在时自动跳过
-
-**前置条件**:
+**方式 1: Git Fork + Pull Request（推荐开源项目）**
 
 ```bash
-# 1. 安装 Taskmaster CLI
-npm install -g task-master-ai
+# 1. Fork 项目到个人仓库
+# 在 GitHub 上点击 Fork 按钮
 
-# 2. 登录 Hamster
-task-master auth login
+# 2. Clone Fork 仓库
+git clone git@github.com:your-username/sprout-chat.git
+cd sprout-chat
 
-# 3. 验证登录
-task-master list
+# 3. 创建功能分支
+git checkout -b feature/new-task
+
+# 4. 编辑 Spec-Kit tasks.md
+vim specs/001-learning-management/tasks.md
+
+# 5. 同步到 Taskmaster
+python3 scripts/auto-sync-to-taskmaster.py
+
+# 6. Git Commit
+git add .
+git commit -m "docs: 添加新任务"
+
+# 7. Push 到 Fork
+git push origin feature/new-task
+
+# 8. 在 GitHub 上创建 Pull Request
 ```
 
-**使用方法**:
+**方式 2: Git Shared Repository（推荐团队项目）**
 
 ```bash
-# 单次同步
-python3 scripts/auto-sync-to-hamster.py
+# 1. Clone 共享仓库
+git clone git@github.com:org/sprout-chat.git
+cd sprout-chat
 
-# 监听模式（前台）
-python3 scripts/auto-sync-to-hamster.py --watch
+# 2. 创建功能分支
+git checkout -b feature/new-task
 
-# 监听模式（后台）
-python3 scripts/auto-sync-to-hamster.py --watch --daemon
+# 3. 编辑 Spec-Kit tasks.md
+vim specs/001-learning-management/tasks.md
 
-# 指定配置文件
-python3 scripts/auto-sync-to-hamster.py \
-  --config .taskmaster/tasks/tasks.json
+# 4. 同步到 Taskmaster
+python3 scripts/auto-sync-to-taskmaster.py
+
+# 5. Git Commit
+git add .
+git commit -m "docs: 添加新任务"
+
+# 6. Push 到共享仓库
+git push origin feature/new-task
+
+# 7. 创建 Pull Request / Merge Request
 ```
 
-**监听模式工作流程**:
+**冲突解决**:
 
-1. 启动监听：`python3 scripts/auto-sync-to-hamster.py --watch`
-2. 检测 `tasks.json` 变化（防抖 2 秒）
-3. 调用 `task-master add-task` 批量推送
-4. 显示推送进度和统计
-5. 任务已存在时跳过（不报错）
+```bash
+# 1. 拉取最新代码
+git fetch origin
+git rebase origin/main
+
+# 2. 解决冲突（如果有）
+# 编辑冲突文件，解决冲突标记
+
+# 3. 标记冲突已解决
+git add .
+git rebase --continue
+
+# 4. 推送
+git push origin feature/new-task --force-with-lease
+```
 
 ### 8.3 Taskmaster CLI 增强工具
 
@@ -790,11 +821,8 @@ Taskmaster 任务统计
 ```bash
 # ===== 阶段 1: 启动自动同步 =====
 
-# Terminal 1: Spec-Kit → Taskmaster 自动同步
+# Terminal: Spec-Kit → Taskmaster 自动同步
 python3 scripts/auto-sync-to-taskmaster.py --watch --daemon
-
-# Terminal 2: Taskmaster → Hamster 自动同步
-python3 scripts/auto-sync-to-hamster.py --watch --daemon
 
 # ===== 阶段 2: 开发工作流 =====
 
@@ -805,17 +833,22 @@ vim specs/001-learning-management/tasks.md
 # [INFO] 检测到 tasks.md 变化
 # [SUCCESS] 已同步 34 个任务到 Taskmaster
 
-# 3. 自动推送到 Hamster（检测到变化）
-# [INFO] 检测到 tasks.json 变化
-# [SUCCESS] 已推送 34 个任务到 Hamster
-
-# 4. 查看任务统计
+# 3. 查看任务统计
 python3 scripts/tm-cli.py stats
 
-# 5. 查看任务树形图
+# 4. 查看任务树形图
 python3 scripts/tm-cli.py visualize
 
-# ===== 阶段 3: 任务开发 =====
+# ===== 阶段 3: Git 协作 =====
+
+# 1. Git Commit
+git add .
+git commit -m "docs: 更新任务列表"
+
+# 2. Push 到远程仓库
+git push origin main
+
+# ===== 阶段 4: 任务开发 =====
 
 # 启动任务
 tm autopilot start LWP-2.2-T001
@@ -838,16 +871,6 @@ pip install watchdog
 pip install -r requirements.txt
 ```
 
-**可选依赖**:
-
-```bash
-# 安装 Taskmaster CLI（用于 Hamster 同步）
-npm install -g task-master-ai
-
-# 登录 Hamster
-task-master auth login
-```
-
 ### 8.6 故障排查
 
 #### 问题 1: watchdog 未安装
@@ -863,23 +886,7 @@ task-master auth login
 pip install watchdog
 ```
 
-#### 问题 2: Hamster 登录失败
-
-**错误信息**:
-```
-[ERROR] 未登录或登录失败
-```
-
-**解决方案**:
-```bash
-# 重新登录
-task-master auth login
-
-# 验证登录
-task-master list
-```
-
-#### 问题 3: 后台进程停止
+#### 问题 2: 后台进程停止
 
 **错误信息**:
 ```
@@ -912,20 +919,19 @@ python3 scripts/tm-cli.py visualize
 ```bash
 # 定期清理日志
 > /tmp/auto-sync-to-taskmaster.log
-> /tmp/auto-sync-to-hamster.log
 
 # 或使用 logrotate
 ```
 
 #### 3. Git hooks 集成
 
-**添加 `.git/hooks/post-commit`**:
+**添加 `.git/hooks/pre-commit`**:
 
 ```bash
 #!/bin/bash
-# Commit 后自动推送到 Hamster
+# Commit 前自动同步 Taskmaster
 
-python3 scripts/auto-sync-to-hamster.py
+python3 scripts/auto-sync-to-taskmaster.py
 ```
 
 #### 4. IDE 集成
@@ -942,14 +948,14 @@ python3 scripts/auto-sync-to-hamster.py
       "command": "python3 scripts/auto-sync-to-taskmaster.py"
     },
     {
-      "label": "Sync Hamster",
-      "type": "shell",
-      "command": "python3 scripts/auto-sync-to-hamster.py"
-    },
-    {
       "label": "Show Stats",
       "type": "shell",
       "command": "python3 scripts/tm-cli.py stats"
+    },
+    {
+      "label": "Visualize Tasks",
+      "type": "shell",
+      "command": "python3 scripts/tm-cli.py visualize"
     }
   ]
 }
@@ -968,6 +974,11 @@ tm show <Task-ID>                    # 查看任务详情
 tm autopilot start <Task-ID>         # 启动任务
 tm autopilot complete <Task-ID>      # 完成任务
 
+# 同步命令
+python3 scripts/auto-sync-to-taskmaster.py    # 同步 Spec-Kit → Taskmaster
+python3 scripts/tm-cli.py stats               # 查看统计
+python3 scripts/tm-cli.py visualize           # 查看树形图
+
 # Git 命令
 git status                           # 查看状态
 git add <files>                      # 添加文件
@@ -985,7 +996,7 @@ black . --check                      # 检查格式
 isort . --check                      # 检查导入排序
 ```
 
-### 8.2 模板文件
+### 9.2 模板文件
 
 **测试模板**: `tests/test_feature_template.py`
 **功能模板**: `backend/app/services/feature_template.py`
@@ -999,6 +1010,7 @@ isort . --check                      # 检查导入排序
 |------|------|---------|
 | v1.0 | 2026-01-08 | 初始版本，确立 TDD 强制流程 |
 | v1.1 | 2026-01-15 | 添加自动化任务管理工具章节 |
+| v1.2 | 2026-01-15 | 移除 Hamster 集成，采用 Taskmaster 本地模式 |
 
 ---
 
