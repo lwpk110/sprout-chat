@@ -137,14 +137,16 @@ git push gitee main
 origin  https://github.com/lwpk110/sprout-chat.git (fetch)
 origin  https://github.com/lwpk110/sprout-chat.git (push)
 ```
-**认证方式**: HTTPS + 个人访问令牌或 SSH 密钥
+**认证方式**: HTTPS
 
 ### Gitee
 ```bash
-gitee   https://gitee.com/steven_lu/sprout-chat.git (fetch)
-gitee   https://gitee.com/steven_lu/sprout-chat.git (push)
+gitee   git@gitee.com:steven_lu/sprout-chat.git (fetch)
+gitee   git@gitee.com:steven_lu/sprout-chat.git (push)
 ```
-**认证方式**: 需要配置（推荐使用个人访问令牌）
+**认证方式**: SSH 公钥 ✅
+
+**测试结果**: ✅ SSH 认证成功，推送测试通过
 
 ---
 
