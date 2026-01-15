@@ -96,7 +96,8 @@ class TaskmasterPusher:
             cmd = [
                 "task-master",
                 "add-task",
-                "--prompt", prompt
+                "--prompt", prompt,
+                "--tag", TASKMASTER_TAG  # 添加 tag 参数
             ]
 
             # 添加依赖关系
